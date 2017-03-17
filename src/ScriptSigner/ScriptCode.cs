@@ -1,22 +1,24 @@
-﻿using Newtonsoft.Json;
-using QlikConnect.Crypt;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace ScriptSigner
+﻿namespace ScriptSigner
 {
+    #region Usings
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using Newtonsoft.Json;
+    using QlikConnect.Crypt;
+    #endregion
+
     public class ScriptCode
     {
+        #region Constructor & Load
         public ScriptCode(string script)
         {
             OriginalScript = script;
             Load();
         }
-
+       
         private void Load()
         {
             var text = OriginalScript.Trim().Replace("\r\n", "\n");
@@ -32,16 +34,26 @@ namespace ScriptSigner
                 Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
 
             var originalWithoutSign = OriginalScript;
+            var sbreak = String.Empty;
             if (originalWithoutSign.IndexOf(Algorithm) > -1)
-                originalWithoutSign = originalWithoutSign.Substring(0, originalWithoutSign.IndexOf(Algorithm)).Trim();
-
-            ScriptWithSign = $"{originalWithoutSign}\n{Signature}".Replace("\n", "\r\n");
-
+            {
+                originalWithoutSign = originalWithoutSign.Substring(0, originalWithoutSign.IndexOf(Algorithm)).Replace("\r\n", "\n");
+                if(originalWithoutSign.EndsWith("\n"))
+                  ScriptWithSign = $"{originalWithoutSign}{Signature}".Replace("\n", "\r\n");
+                else
+                  ScriptWithSign = $"{originalWithoutSign}\n{Signature}".Replace("\n", "\r\n");
+            } 
+            else
+            {
+                ScriptWithSign = $"{originalWithoutSign}\n{Signature}".Replace("\n", "\r\n");
+            }
+                
             var args = Regex.Match(OriginalScript, $"{ExecuteName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
             Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(args);
             if (Parameters == null)
                 Parameters = new Dictionary<string, string>();
         }
+        #endregion
 
         #region Variables & Properties
         public string OriginalScript { get; private set; }
