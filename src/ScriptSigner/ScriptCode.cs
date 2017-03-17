@@ -22,7 +22,7 @@
         private void Load()
         {
             var text = OriginalScript.Trim().Replace("\r\n", "\n");
-            Code = Regex.Replace(text, $"({ExecuteName}[^\n]+)\n", "", RegexOptions.Singleline).Trim();
+            Code = Regex.Replace(text, $"{ExecuteName}[^\n]*\n", "", RegexOptions.Singleline).Trim();
             if (Code.IndexOf(Algorithm) > -1)
                 Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
 
@@ -33,19 +33,19 @@
             if (Code.IndexOf(Algorithm) > -1)
                 Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
 
-            var originalWithoutSign = OriginalScript;
+            var originalWithoutSign = OriginalScript.Replace("\r\n", "\n");
             var sbreak = String.Empty;
             if (originalWithoutSign.IndexOf(Algorithm) > -1)
             {
-                originalWithoutSign = originalWithoutSign.Substring(0, originalWithoutSign.IndexOf(Algorithm)).Replace("\r\n", "\n");
+                originalWithoutSign = originalWithoutSign.Substring(0, originalWithoutSign.IndexOf(Algorithm));
                 if(originalWithoutSign.EndsWith("\n"))
-                  ScriptWithSign = $"{originalWithoutSign}{Signature}".Replace("\n", "\r\n");
+                  ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}{Signature}";
                 else
-                  ScriptWithSign = $"{originalWithoutSign}\n{Signature}".Replace("\n", "\r\n");
+                  ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}\r\n{Signature}";
             } 
             else
             {
-                ScriptWithSign = $"{originalWithoutSign}\n{Signature}".Replace("\n", "\r\n");
+                ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}\r\n{Signature}";
             }
                 
             var args = Regex.Match(OriginalScript, $"{ExecuteName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
