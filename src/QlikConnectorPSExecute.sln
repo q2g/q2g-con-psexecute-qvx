@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QlikConnectorPSExecute", "QlikConnectorPSExecute\QlikConnector.csproj", "{E3D9EAB5-A8D9-4530-8C08-D31650B6B467}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QlikConnectorPSExecute", "QlikConnectorPSExecute\QlikConnectorPSExecute.csproj", "{E3D9EAB5-A8D9-4530-8C08-D31650B6B467}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorTest", "ConnectorTest\ConnectorTest.csproj", "{506F4CE2-3C6A-4D69-BBD4-E499434FC6FD}"
 EndProject
