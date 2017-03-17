@@ -54,9 +54,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QlikConnector\QlikConnector.csproj">
-      <Project>{e3d9eab5-a8d9-4530-8c08-d31650b6b467}</Project>
-      <Name>QlikConnector</Name>
+    <ProjectReference Include="..\QlikConnectorPSExecute\QlikConnectorPSExecute.csproj">
+      <Project>{21281672-e242-41b3-bc23-f15ff5bbca24}</Project>
+      <Name>QlikConnectorPSExecute</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

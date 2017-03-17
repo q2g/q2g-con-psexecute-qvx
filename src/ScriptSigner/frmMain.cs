@@ -76,7 +76,7 @@
         }
         #endregion
 
-        #region Variables and Propertys
+        #region Variables & Properties
         private string SignName { get; set; } = "PSSIGNATURE:";
         private string ExecuteName { get; set; } = "PSEXECUTE";
         #endregion

@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using QlikConnect;
+using QlikConnectorPSExecute;
 using System.IO;
 
 namespace ConnectorTest

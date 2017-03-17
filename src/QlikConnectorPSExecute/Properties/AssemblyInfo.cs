@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden 
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die einer Assembly zugeordnet sind.
-[assembly: AssemblyTitle("QlikConnector")]
+[assembly: AssemblyTitle("QlikConnectorPSExecute")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("QlikConnector")]
+[assembly: AssemblyProduct("QlikConnectorPSExecute")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt für COM verfügbar gemacht wird
-[assembly: Guid("e3d9eab5-a8d9-4530-8c08-d31650b6b467")]
+[assembly: Guid("21281672-e242-41b3-bc23-f15ff5bbca24")]
 
 // Versionsinformationen für eine Assembly bestehen aus den folgenden vier Werten:
 //

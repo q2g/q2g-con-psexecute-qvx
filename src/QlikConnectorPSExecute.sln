@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QlikConnectorPSExecute", "QlikConnectorPSExecute\QlikConnectorPSExecute.csproj", "{E3D9EAB5-A8D9-4530-8C08-D31650B6B467}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorTest", "ConnectorTest\ConnectorTest.csproj", "{506F4CE2-3C6A-4D69-BBD4-E499434FC6FD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoManager", "CryptoManager\CryptoManager.csproj", "{D77392FE-E248-43EC-AC31-7720B59108D5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptSigner", "ScriptSigner\ScriptSigner.csproj", "{7BB906B2-5A2C-43F6-84AD-E670057BEB30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QlikConnectorPSExecute", "QlikConnectorPSExecute\QlikConnectorPSExecute.csproj", "{21281672-E242-41B3-BC23-F15FF5BBCA24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E3D9EAB5-A8D9-4530-8C08-D31650B6B467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E3D9EAB5-A8D9-4530-8C08-D31650B6B467}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E3D9EAB5-A8D9-4530-8C08-D31650B6B467}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E3D9EAB5-A8D9-4530-8C08-D31650B6B467}.Release|Any CPU.Build.0 = Release|Any CPU
 		{506F4CE2-3C6A-4D69-BBD4-E499434FC6FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{506F4CE2-3C6A-4D69-BBD4-E499434FC6FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{506F4CE2-3C6A-4D69-BBD4-E499434FC6FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{7BB906B2-5A2C-43F6-84AD-E670057BEB30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BB906B2-5A2C-43F6-84AD-E670057BEB30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BB906B2-5A2C-43F6-84AD-E670057BEB30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21281672-E242-41B3-BC23-F15FF5BBCA24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21281672-E242-41B3-BC23-F15FF5BBCA24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21281672-E242-41B3-BC23-F15FF5BBCA24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21281672-E242-41B3-BC23-F15FF5BBCA24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

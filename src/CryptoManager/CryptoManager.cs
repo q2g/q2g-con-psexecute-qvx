@@ -54,7 +54,6 @@
             code = code.Trim();
             code = code.Replace("\r\n", "\n");
             code = code.Replace("\t", "");
-            code = code.Replace("\n\n", "\n");
 
             return code;
         }

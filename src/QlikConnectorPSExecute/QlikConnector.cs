@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace QlikConnect
+namespace QlikConnectorPSExecute
 {
     //Script-Snipsel signieren
     //Tests bauen für dsignierung
