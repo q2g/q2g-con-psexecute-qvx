@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QlikConnectorPSExecute;
 using System.IO;
 using QlikConnect.Crypt;
+using ConnectorTest.Properties;
 
 namespace ConnectorTest
 {
@@ -60,6 +61,14 @@ namespace ConnectorTest
         public void Format6()
         {
             var script = $" PSEXCEUTE()\r\n  Get-Process | Select-Object ProcessName, Handles, ID\r\n  \r\n  \r\n PSSIGNATURE:{SignString}";
+            var connector = GetConnector(script);
+            var table = connector.GetTable();
+        }
+
+        [TestMethod]
+        public void Format7()
+        {
+            var script = Resources.Script;
             var connector = GetConnector(script);
             var table = connector.GetTable();
         }

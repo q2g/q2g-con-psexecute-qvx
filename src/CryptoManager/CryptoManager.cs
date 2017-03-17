@@ -103,12 +103,12 @@
 
         public string SignWithPrivateKey(string data)
         {
-            return SignWithPrivateKey(false, data, false, "SHA256");
+            return SignWithPrivateKey(false, data, false, "SHA-256");
         }
 
         public string SignWithPrivateKey(string data, bool use_indent)
         {
-            return SignWithPrivateKey(false, data, use_indent, "SHA256");
+            return SignWithPrivateKey(false, data, use_indent, "SHA-256");
         }
 
         public string SignWithPrivateKey(string data, bool use_indent, string algorithm)

@@ -24,41 +24,55 @@ namespace QlikConnectorPSExecute
             Init(script);
         }
 
-        private void Init(string script)
+        private void Init(string scriptText)
         {
-            if (String.IsNullOrEmpty(script))
+            if (String.IsNullOrEmpty(scriptText))
                 throw new Exception("The script is empty.");
 
-            if (script.Contains(SignName) == false)
+            if (scriptText.Contains(ScriptCode.Algorithm) == false)
                 throw new Exception("The signature was not found.");
 
-            script = script.Replace("\r\n", "\n").Trim();
-            var sign = script.Substring(script.IndexOf(SignName) + SignName.Length).Trim();
-            var code = Regex.Replace(script, $"{ExecuteName}[^\n]+\n", "", RegexOptions.Singleline).Trim();
-            code = code.Substring(0, code.IndexOf(SignName)).Trim();
-            var args = Regex.Match(script, $"{ExecuteName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
-            Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(args);
-            if (Parameters == null)
-                Parameters = new Dictionary<string, string>();
+            var script = new ScriptCode(scriptText);
 
-            var qlikPublicKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-            var manager = new CryptoManager(qlikPublicKey);
-            var src = "Demo 123456789";
-            sign = manager.SignWithPrivateKey(src);
+            //var qlikPublicKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server.pem";
+            //var fileStream = File.OpenText(qlikPublicKey);
+            //var pemReader = new PemReader(fileStream);
+            //var certificate = (X509Certificate)pemReader.ReadObject();
+            //var publicKey = certificate.GetPublicKey() as RsaKeyParameters;
 
-            if (CryptoManager.IsValidPublicKey(src, sign, manager.PublicKey) == false)
+            var qlikPrivateKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+            var manager = new CryptoManager(qlikPrivateKey);
+
+            if (CryptoManager.IsValidPublicKey(script.Code, script.RawSignature, manager.PublicKey) == false)
                 throw new Exception("The singnature of the script is invalid.");
 
-            qlikPublicKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server.pem";
-            var fileStream = File.OpenText(qlikPublicKey);
-            var pemReader = new PemReader(fileStream);
-            var certificate = (X509Certificate)pemReader.ReadObject();
-            var publicKey = certificate.GetPublicKey() as RsaKeyParameters;
+            //script = script.Replace("\r\n", "\n").Trim();
+            //var sign = script.Substring(script.IndexOf(SignName) + SignName.Length).Trim();
+            //var code = Regex.Replace(script, $"{ExecuteName}[^\n]+\n", "", RegexOptions.Singleline).Trim();
+            //code = code.Substring(0, code.IndexOf(SignName)).Trim();
+            //var args = Regex.Match(script, $"{ExecuteName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
+            //Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(args);
+            //if (Parameters == null)
+            //    Parameters = new Dictionary<string, string>();
 
-            if (CryptoManager.IsValidPublicKey(src, sign, publicKey) == false)
-                throw new Exception("The singnature of the script is invalid.");
+            //var qlikPublicKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+            //var manager = new CryptoManager(qlikPublicKey);
+            //var src = "Demo 123456789";
+            //sign = manager.SignWithPrivateKey(src);
 
-            Script = code;
+            //if (CryptoManager.IsValidPublicKey(src, sign, manager.PublicKey) == false)
+            //    throw new Exception("The singnature of the script is invalid.");
+
+            //qlikPublicKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server.pem";
+            //var fileStream = File.OpenText(qlikPublicKey);
+            //var pemReader = new PemReader(fileStream);
+            //var certificate = (X509Certificate)pemReader.ReadObject();
+            //var publicKey = certificate.GetPublicKey() as RsaKeyParameters;
+
+            //if (CryptoManager.IsValidPublicKey(src, sign, publicKey) == false)
+            //    throw new Exception("The singnature of the script is invalid.");
+
+            Script = "";
         }
 
         public string GetTable()

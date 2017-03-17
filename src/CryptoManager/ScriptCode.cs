@@ -1,4 +1,4 @@
-﻿namespace ScriptSigner
+﻿namespace QlikConnect.Crypt
 {
     #region Usings
     using System;
@@ -29,6 +29,7 @@
             var qlikPrivateKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
             var manager = new CryptoManager(qlikPrivateKey);
             Signature = manager.SignWithPrivateKey(true, Code, true, Algorithm);
+            RawSignature = manager.SignWithPrivateKey(false, Code, false, Algorithm);
 
             if (Code.IndexOf(Algorithm) > -1)
                 Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
@@ -61,9 +62,10 @@
         public string Code { get; private set; }
         public string Signature { get; private set; }
         public string ScriptWithSign { get; private set; }
-        public static string ExecuteName { get; set; } = "PSEXECUTE";
+        public string RawSignature { get; private set; }
 
-        private string Algorithm { get; set; } = "SHA-256";
+        public static string ExecuteName { get; private set; } = "PSEXECUTE";
+        public static string Algorithm { get; private set; } = "SHA-256";
         #endregion
     }
 }
