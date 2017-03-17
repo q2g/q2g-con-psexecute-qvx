@@ -1,8 +1,13 @@
 ﻿using Newtonsoft.Json;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.X509;
 using QlikConnect.Crypt;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -12,15 +17,6 @@ using System.Threading.Tasks;
 
 namespace QlikConnectorPSExecute
 {
-    //Script-Snipsel signieren
-    //Tests bauen für dsignierung
-    //Json object von Arguments erstellen und übergeben
-    //Sense Server installieren
-    //C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates (Server)
-    //Winformsanwendung nur mit Oberfläche wenn ohne Parameter
-    //Statische Property
-    //Nur Codesnippel in Oberfläche einfügen
-
     public class QlikConnector
     {
         public QlikConnector(string script)
@@ -38,16 +34,28 @@ namespace QlikConnectorPSExecute
 
             script = script.Replace("\r\n", "\n").Trim();
             var sign = script.Substring(script.IndexOf(SignName) + SignName.Length).Trim();
-            var code = Regex.Replace(script, $"({MainName}\\({{[^}}]+}}\\))", "", RegexOptions.Singleline).Trim();
+            var code = Regex.Replace(script, $"{ExecuteName}[^\n]+\n", "", RegexOptions.Singleline).Trim();
             code = code.Substring(0, code.IndexOf(SignName)).Trim();
-            var args = Regex.Match(script, $"{MainName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
+            var args = Regex.Match(script, $"{ExecuteName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
             Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(args);
             if (Parameters == null)
                 Parameters = new Dictionary<string, string>();
 
-            var rootCertPath = "";
-            Manager = new CryptoManager(rootCertPath);
-            if (Manager.IsValid(code, sign) == false)
+            var qlikPublicKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+            var manager = new CryptoManager(qlikPublicKey);
+            var src = "Demo 123456789";
+            sign = manager.SignWithPrivateKey(src);
+
+            if (CryptoManager.IsValidPublicKey(src, sign, manager.PublicKey) == false)
+                throw new Exception("The singnature of the script is invalid.");
+
+            qlikPublicKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server.pem";
+            var fileStream = File.OpenText(qlikPublicKey);
+            var pemReader = new PemReader(fileStream);
+            var certificate = (X509Certificate)pemReader.ReadObject();
+            var publicKey = certificate.GetPublicKey() as RsaKeyParameters;
+
+            if (CryptoManager.IsValidPublicKey(src, sign, publicKey) == false)
                 throw new Exception("The singnature of the script is invalid.");
 
             Script = code;
@@ -98,6 +106,6 @@ namespace QlikConnectorPSExecute
         private Dictionary<string, string> Parameters { get; set; }
 
         private string SignName { get; set; } = "PSSIGNATURE:";
-        private string MainName { get; set; } = "PSEXECUTE";
+        private string ExecuteName { get; set; } = "PSEXECUTE";
     }
 }

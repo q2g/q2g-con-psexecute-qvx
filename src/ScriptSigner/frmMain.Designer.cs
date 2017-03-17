@@ -75,6 +75,7 @@
             this.tbxSign.Location = new System.Drawing.Point(12, 40);
             this.tbxSign.Multiline = true;
             this.tbxSign.Name = "tbxSign";
+            this.tbxSign.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.tbxSign.Size = new System.Drawing.Size(754, 258);
             this.tbxSign.TabIndex = 3;
             // 

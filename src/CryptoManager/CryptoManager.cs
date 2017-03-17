@@ -49,15 +49,6 @@
         #endregion
 
         #region Static Methods
-        private static string FormatCode(string code)
-        {
-            code = code.Trim();
-            code = code.Replace("\r\n", "\n");
-            code = code.Replace("\t", "");
-
-            return code;
-        }
-
         public static RsaKeyParameters ReadPublicKey(string public_key_path)
         {
             try
@@ -76,12 +67,15 @@
 
         public static bool IsValidPublicKey(string data, string sign, RsaKeyParameters public_key)
         {
+            return IsValidPublicKey(data, sign, public_key, "SHA256withRSA");
+        }
+
+        public static bool IsValidPublicKey(string data, string sign, RsaKeyParameters public_key, string algorithm)
+        {
             try
             {
-                data = FormatCode(data);
-
                 var sig = Convert.FromBase64String(sign);
-                ISigner signer = SignerUtilities.GetSigner("SHA1WithRSA");
+                ISigner signer = SignerUtilities.GetSigner(algorithm);
                 signer.Init(false, public_key);
 
                 var msgBytes = Encoding.Default.GetBytes(data);
@@ -109,43 +103,37 @@
 
         public string SignWithPrivateKey(string data)
         {
-            return SignWithPrivateKey(null, data);
+            return SignWithPrivateKey(false, data, false, "SHA256");
         }
 
-        public string SignWithPrivateKey(string prefix, string data)
+        public string SignWithPrivateKey(string data, bool use_indent)
         {
-            data = FormatCode(data);
+            return SignWithPrivateKey(false, data, use_indent, "SHA256");
+        }
 
+        public string SignWithPrivateKey(string data, bool use_indent, string algorithm)
+        {
+            return SignWithPrivateKey(false, data, use_indent, algorithm);
+        }
+
+        public string SignWithPrivateKey(bool write_algo_as_prefix, string data, bool use_indent, string algorithm)
+        {
             var rsa = RSA.Create() as RSACryptoServiceProvider;
             var rsaParameters = DotNetUtilities.ToRSAParameters(PrivateKey);
             rsa.ImportParameters(rsaParameters);
 
             var sha = new SHA1CryptoServiceProvider();
             var hash = sha.ComputeHash(Encoding.ASCII.GetBytes(data));
+            var sig = rsa.SignHash(hash, CryptoConfig.MapNameToOID(algorithm));
 
-            var sig = rsa.SignHash(hash, CryptoConfig.MapNameToOID("SHA1"));
+            var prefix = String.Empty;
+            if (write_algo_as_prefix)
+                prefix = $"{algorithm}:";
+
+            if (use_indent)
+               return prefix + Convert.ToBase64String(sig, Base64FormattingOptions.InsertLineBreaks);
 
             return prefix + Convert.ToBase64String(sig);
-        }
-
-        public bool IsValid(string data, string sign)
-        {
-            try
-            {
-                data = FormatCode(data);
-
-                var sig = Convert.FromBase64String(sign);
-                ISigner signer = SignerUtilities.GetSigner("SHA1WithRSA");
-                signer.Init(false, PublicKey);
-
-                var msgBytes = Encoding.Default.GetBytes(data);
-                signer.BlockUpdate(msgBytes, 0, msgBytes.Length);
-                return signer.VerifySignature(sig);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("The public key could not be properly verified.", ex);
-            }
         }
 
         private void SaveKey(string path, object key)

@@ -50,10 +50,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ScriptFormatTest.cs" />
+    <Compile Include="QlikConnectorPSExecuteTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CryptoManager\CryptoManager.csproj">
+      <Project>{d77392fe-e248-43ec-ac31-7720b59108d5}</Project>
+      <Name>CryptoManager</Name>
+    </ProjectReference>
     <ProjectReference Include="..\QlikConnectorPSExecute\QlikConnectorPSExecute.csproj">
       <Project>{21281672-e242-41b3-bc23-f15ff5bbca24}</Project>
       <Name>QlikConnectorPSExecute</Name>

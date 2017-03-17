@@ -45,40 +45,21 @@
                     return;
                 }
 
-                var code = tbxSign.Text.Trim().Replace("\r\n", "\n");
-                if(code.Contains(ExecuteName) == false)
+                if (tbxSign.Text.Contains(ScriptCode.ExecuteName) == false)
                 {
-                    MsgBox.ShowWarning($"Please use a correct code with \"{ExecuteName}\".");
+                    MsgBox.ShowWarning($"Please use a correct code with \"{ScriptCode.ExecuteName}\".");
                     return;
                 }
 
-                if (code.Contains(SignName))
-                {
-                    MsgBox.ShowWarning($"The source code is already signed.");
-                    return;
-                }
-
-                var qlikPrivateKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-                var manager = new CryptoManager(qlikPrivateKey);
-
-                code = Regex.Replace(code, $"({ExecuteName}[^\n]+)\n", "", RegexOptions.Singleline).Trim();
-                var signature = manager.SignWithPrivateKey(SignName, code);
-                code = $"{code}\n{signature}";
-                code = code.Replace("\n", "\r\n");
-
-                Clipboard.SetText(code);
-                MsgBox.ShowInfo("The created script was copied to the clipboard.");
+                var script = new ScriptCode(tbxSign.Text);
+                Clipboard.SetText(script.ScriptWithSign);
+                tbxSign.Text = script.ScriptWithSign;
             }
             catch (Exception ex)
             {
                 MsgBox.ShowError(ex);
             }
         }
-        #endregion
-
-        #region Variables & Properties
-        private string SignName { get; set; } = "PSSIGNATURE:";
-        private string ExecuteName { get; set; } = "PSEXECUTE";
         #endregion
     }
 }
