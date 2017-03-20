@@ -65,7 +65,7 @@
         public string RawSignature { get; private set; }
 
         public static string ExecuteName { get; private set; } = "PSEXECUTE";
-        public static string Algorithm { get; private set; } = "SHA-256";
+        public static string Algorithm { get; private set; } = "SHA256";
         #endregion
     }
 }

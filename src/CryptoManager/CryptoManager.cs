@@ -103,12 +103,12 @@
 
         public string SignWithPrivateKey(string data)
         {
-            return SignWithPrivateKey(false, data, false, "SHA-256");
+            return SignWithPrivateKey(false, data, false, "SHA256");
         }
 
         public string SignWithPrivateKey(string data, bool use_indent)
         {
-            return SignWithPrivateKey(false, data, use_indent, "SHA-256");
+            return SignWithPrivateKey(false, data, use_indent, "SHA256");
         }
 
         public string SignWithPrivateKey(string data, bool use_indent, string algorithm)
@@ -122,9 +122,10 @@
             var rsaParameters = DotNetUtilities.ToRSAParameters(PrivateKey);
             rsa.ImportParameters(rsaParameters);
 
-            var sha = new SHA1CryptoServiceProvider();
+            var sha = new SHA256CryptoServiceProvider();
             var hash = sha.ComputeHash(Encoding.ASCII.GetBytes(data));
-            var sig = rsa.SignHash(hash, CryptoConfig.MapNameToOID(algorithm));
+            var id = CryptoConfig.MapNameToOID(algorithm);
+            var sig = rsa.SignHash(hash, id);
 
             var prefix = String.Empty;
             if (write_algo_as_prefix)
