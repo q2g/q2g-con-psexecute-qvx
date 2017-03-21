@@ -1,7 +1,6 @@
 ﻿namespace QlikConnectorPSExecute
 {
     #region Usings
-    using QlikConnect.Crypt;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -69,7 +68,7 @@
                     return;
                 }
 
-                var script = new ScriptCode(tbxSign.Text);
+                var script = ScriptCode.Parse(tbxSign.Text);
                 Clipboard.SetText(script.ScriptWithSign);
                 tbxSign.Text = script.ScriptWithSign;
 

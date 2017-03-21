@@ -1,11 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace QlikConnectorPSExecute
+﻿namespace QlikConnectorPSExecute
 {
+    using Fclp;
+    #region Usings
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Windows.Forms;
+    #endregion
+
     static class Program
     {
         /// <summary>
@@ -15,7 +18,14 @@ namespace QlikConnectorPSExecute
         static void Main()
         {
             var args = Environment.GetCommandLineArgs();
-            if (args.Length <= 1)
+            var fargs = new FluentCommandLineParser<AppArguments>();
+            var result = fargs.Parse(args);
+            if (result.HasErrors)
+            {
+                return;
+            }
+
+            if (result.EmptyArgs)
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -23,9 +33,14 @@ namespace QlikConnectorPSExecute
             }
             else
             {
-                //Obejct erstellen
-                var connector = new QlikConnector(args[1].ToString());
+                var script = ScriptCode.Parse(fargs.Object.Script);
+                var connector = new PSExecute(script);
             }
         }
+    }
+
+    public class AppArguments
+    {
+        public string Script { get; private set; }
     }
 }

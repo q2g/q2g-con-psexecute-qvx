@@ -1,4 +1,4 @@
-﻿namespace QlikConnect.Crypt
+﻿namespace QlikConnectorPSExecute
 {
     #region Usings
     using Org.BouncyCastle.Crypto;
@@ -65,12 +65,7 @@
             }
         }
 
-        public static bool IsValidPublicKey(string data, string sign, RsaKeyParameters public_key)
-        {
-            return IsValidPublicKey(data, sign, public_key, "SHA256withRSA");
-        }
-
-        public static bool IsValidPublicKey(string data, string sign, RsaKeyParameters public_key, string algorithm)
+        public static bool IsValidPublicKey(string data, string sign, RsaKeyParameters public_key, string algorithm = "SHA256withRSA")
         {
             try
             {
@@ -114,7 +109,7 @@
 
             var prefix = String.Empty;
             if (write_algo_as_prefix)
-                prefix = $"{algorithm}:";
+                prefix = $"{algorithm}:\n";
 
             if (use_indent)
                return prefix + Convert.ToBase64String(sig, Base64FormattingOptions.InsertLineBreaks);

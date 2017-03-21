@@ -6,7 +6,6 @@
     using Org.BouncyCastle.Crypto.Parameters;
     using Org.BouncyCastle.OpenSsl;
     using Org.BouncyCastle.X509;
-    using QlikConnect.Crypt;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -19,40 +18,12 @@
     using System.Threading.Tasks;
     #endregion
 
-    public interface IView
-    {
-
-    }
-
-    public class QlikConnector
+    public class PSExecute
     {
         #region Constructor & Init
-        public QlikConnector(string script)
+        public PSExecute(ScriptCode code)
         {
-            Init(script);
-        }
-
-        private void Init(string scriptText)
-        {
-            if (String.IsNullOrEmpty(scriptText))
-                throw new ArgumentException("The script is empty.");
-
-            if (scriptText.Contains(ScriptCode.Algorithm) == false)
-                throw new ArgumentException("The signature was not found.");
-
-            if (scriptText.Contains(ScriptCode.ExecuteName) == false)
-                throw new ArgumentException($"The command {ScriptCode.ExecuteName} was not found.");
-
-            var script = new ScriptCode(scriptText);
-
-            var qlikPrivateKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-            var manager = new CryptoManager(qlikPrivateKey);
-            
-            
-            if (CryptoManager.IsValidPublicKey(script.Code, script.RawSignature, manager.PublicKey) == false)
-                throw new Exception("The singnature of the script is invalid.");
-
-            Script = script;
+            Script = code;
         }
         #endregion
 
@@ -61,6 +32,8 @@
         {
             try
             {
+                //Table object reutrn
+
                 using (var powerShell = PowerShell.Create())
                 {
                     powerShell.AddScript(Script.Code);
