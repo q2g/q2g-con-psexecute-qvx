@@ -59,20 +59,5 @@ namespace ConnectorTest.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die PSEXECUTE({arg1:&quot;Hallo&quot;, arg2:&quot;test&quot;})
-        ///Get-Process | Select-Object Name, Id
-        ///SHA-256:TEN65G0IiynspsIkEqDfYIBA9jVn+LyGB7S0rBoh/nd34ny3nf/WV/nwEmS18wXFCVla5mltGAaO
-        ///soCeUKrR6Zamm4sQzZqJKE9sZ9NwMC9xlWmqBWWz+tgBsGW9Hk0I+tIjbiaP7SzbcAo4Bj6DWypV
-        ///NRTc0Vayc/dZrypCQqLB5eBqFHzVZWManngw/3iusiyIMzAl+DG8cJN302OdsS1tV1lS/FsSAlf4
-        ///juGBs53dhLPyU2h72tJh74tO5AYaRV96sDFj0P5U5Jqw59m/1pzkZeFcHahwGRHMkmz+y/WvEfuD
-        ///kbxdWLCcGfPJqDYbgJEi3rLHUXAV08H2y8qX3g== ähnelt.
-        /// </summary>
-        internal static string Script {
-            get {
-                return ResourceManager.GetString("Script", resourceCulture);
-            }
-        }
     }
 }

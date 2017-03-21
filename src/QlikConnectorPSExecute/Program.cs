@@ -14,9 +14,18 @@ namespace QlikConnectorPSExecute
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length <= 1)
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new frmMain());
+            }
+            else
+            {
+                //Obejct erstellen
+                var connector = new QlikConnector(args[1].ToString());
+            }
         }
     }
 }

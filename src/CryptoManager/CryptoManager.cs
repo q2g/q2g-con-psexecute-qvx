@@ -101,22 +101,7 @@
             return keyPairGenerator.GenerateKeyPair();
         }
 
-        public string SignWithPrivateKey(string data)
-        {
-            return SignWithPrivateKey(false, data, false, "SHA256");
-        }
-
-        public string SignWithPrivateKey(string data, bool use_indent)
-        {
-            return SignWithPrivateKey(false, data, use_indent, "SHA256");
-        }
-
-        public string SignWithPrivateKey(string data, bool use_indent, string algorithm)
-        {
-            return SignWithPrivateKey(false, data, use_indent, algorithm);
-        }
-
-        public string SignWithPrivateKey(bool write_algo_as_prefix, string data, bool use_indent, string algorithm)
+        public string SignWithPrivateKey(string data, bool write_algo_as_prefix=false,  bool use_indent=false, string algorithm="SHA256")
         {
             var rsa = RSA.Create() as RSACryptoServiceProvider;
             var rsaParameters = DotNetUtilities.ToRSAParameters(PrivateKey);

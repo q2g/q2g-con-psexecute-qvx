@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorTest", "ConnectorT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoManager", "CryptoManager\CryptoManager.csproj", "{D77392FE-E248-43EC-AC31-7720B59108D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptSigner", "ScriptSigner\ScriptSigner.csproj", "{7BB906B2-5A2C-43F6-84AD-E670057BEB30}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QlikConnectorPSExecute", "QlikConnectorPSExecute\QlikConnectorPSExecute.csproj", "{21281672-E242-41B3-BC23-F15FF5BBCA24}"
 EndProject
 Global
@@ -25,10 +23,6 @@ Global
 		{D77392FE-E248-43EC-AC31-7720B59108D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D77392FE-E248-43EC-AC31-7720B59108D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D77392FE-E248-43EC-AC31-7720B59108D5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7BB906B2-5A2C-43F6-84AD-E670057BEB30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7BB906B2-5A2C-43F6-84AD-E670057BEB30}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7BB906B2-5A2C-43F6-84AD-E670057BEB30}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7BB906B2-5A2C-43F6-84AD-E670057BEB30}.Release|Any CPU.Build.0 = Release|Any CPU
 		{21281672-E242-41B3-BC23-F15FF5BBCA24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{21281672-E242-41B3-BC23-F15FF5BBCA24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21281672-E242-41B3-BC23-F15FF5BBCA24}.Release|Any CPU.ActiveCfg = Release|Any CPU

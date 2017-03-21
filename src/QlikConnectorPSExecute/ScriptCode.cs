@@ -1,4 +1,4 @@
-﻿namespace QlikConnect.Crypt
+﻿namespace QlikConnectorPSExecute
 {
     #region Usings
     using System;
@@ -28,8 +28,8 @@
 
             var qlikPrivateKey = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
             var manager = new CryptoManager(qlikPrivateKey);
-            Signature = manager.SignWithPrivateKey(true, Code, true, Algorithm);
-            RawSignature = manager.SignWithPrivateKey(false, Code, false, Algorithm);
+            Signature = manager.SignWithPrivateKey(Code, true, true, Algorithm);
+            RawSignature = manager.SignWithPrivateKey(Code, false,  false, Algorithm);
 
             if (Code.IndexOf(Algorithm) > -1)
                 Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();

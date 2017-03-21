@@ -10,67 +10,51 @@ namespace ConnectorTest
     [TestClass]
     public class QlikConnectorPSExecuteTest
     {
-        private QlikConnector GetConnector(string script)
-        {
-            return new QlikConnector(script);
-        }
-
-        private string SignString { get; } = "iojbicpeFmhXVpLo4EqgAMEkpjtIBqjnSnoZehsX4Pf1Rqaguy2dJyj1phyivXLO75y9mNX3nP0spU6Z4Iu8qFpPq185Cv+/i74/H+cMbzkhgpPmzayplLORe6gJKE6eYU59omeSRQ2CWScuhSi5BjVPww8TcT7aYGqPTKucM8LI5bbZtR8aMlRgEFh4R9WotBHHB67VVxWoDLdi6jp9EcMvL0zq1zWJTHSnGBDYw6RUJYQdyAyry54DTyPvB969GqGsvoLzugvLPJ3oeLdA07VFbCL9ddHIKYPCh+VvGH0WjPlzVDn79sc7SRRGXCfwAHArvgqtQxrqgplI4I2xhA==";
+        private string Command { get; } = "Get-Process | Select-Object ProcessName, Handles, ID";
+        private string SignString { get; } = "A45Wkb0gK+3CWMUyPMfNQpr6aeIAUx3PA8D3NlVd4cibWZi4Ba4SxAwrD4dzArS82tkVidbceRIN+AetQC7Xuo6Kf3a6wEMUrtqrjwe/w8Vqm4u3sPM8iFziEc2yBPA4U3SckHiDL6dv+lILBQXDJFvdF7lVOfGQeWSaDPU5hvV8RFTQtz01Nu937Q5DKRP8txSc1FxMiVXy8uMyPGSTPWohY7EBPiSqHagoBiO2rNv5VqV1hnjUvXKdSfkBLr0s+jXieZcgGE8TFTkH2Ok6tH5BZNjNQd4h6sKnlkdIjyjPr0ERVNbF9kaEKrWs9PE07VSx4qD+m1mO5ECyRro+9w==";
 
         [TestMethod]
-        public void Format1()
+        public void ScriptWithArguments()
         {
-            var script = $"PSEXECUTE()\r\n\tGet-Process | Select-Object ProcessName, Handles, ID\r\n\tPSSIGNATURE:{SignString}";
-            var connector = GetConnector(script);
-            var table = connector.GetTable();
+            var qconn = new QlikConnector($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object Name, Id\r\nSHA256:\r\n{SignString}");
         }
 
         [TestMethod]
-        public void Format2()
+        public void ScriptWithBreaksAndTabs()
         {
-            var script = $" PSEXECUTE()\r\n  Get-Process | Select-Object ProcessName, Handles, ID\r\n PSSIGNATURE:{SignString}";
-            var connector = GetConnector(script);
-            var table = connector.GetTable();
+            var qconn = new QlikConnector($"PSEXECUTE()\r\n\t{Command}\r\n\tSHA256:\r\n{SignString}");
         }
 
         [TestMethod]
-        public void Format3()
+        public void ScriptWithUnixBreaks()
         {
-            var script = $" PSEXECUTE()\r\n  Get-Process | Select-Object ProcessName, Handles, ID\r\n\r\n PSSIGNATURE:{SignString}";
-            var connector = GetConnector(script);
-            var table = connector.GetTable();
+            var qconn = new QlikConnector($" PSEXECUTE()\n  {Command}\n SHA256:\n{SignString}");
         }
 
         [TestMethod]
-        public void Format4()
+        public void ScriptWithNoArguments()
         {
-            var script = $" \r\n\r\n\r\n\r\n\r\nPSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object ProcessName, Handles, ID\\n\r\n PSSIGNATURE:{SignString}\r\n \r\n \r\n \r\n \r\n ";
-            var connector = GetConnector(script);
-            var table = connector.GetTable();
+            var qconn = new QlikConnector($" PSEXECUTE()\r\n  {Command}\r\n\r\n SHA256:\r\n{SignString}");
         }
 
         [TestMethod]
-        public void Format5()
+        public void ScriptWithMoreBreaksAndArguments()
         {
-            var script = $" \r\n\r\n\r\n\r\n\r\nPSEXECUTE\r\nGet-Process | Select-Object ProcessName, Handles, ID\n\r\nmehre befehle,.-..\r\nPSSIGNATURE:{SignString}\r\n \r\n \r\n \r\n \r\n ";
-            var connector = GetConnector(script);
-            var table = connector.GetTable();
+            var qconn = new QlikConnector($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\n\r\n SHA256:\r\n{SignString}\r\n \r\n \r\n \r\n \r\n ");
         }
 
         [TestMethod]
-        public void Format6()
+        [ExpectedException(typeof(PowerShellException))]
+        public void ScriptWithUnknownArguments()
         {
-            var script = $" PSEXCEUTE()\r\n  Get-Process | Select-Object ProcessName, Handles, ID\r\n  \r\n  \r\n PSSIGNATURE:{SignString}";
-            var connector = GetConnector(script);
-            var table = connector.GetTable();
+            var qconn = new QlikConnector($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE\r\n{Command}\n\r\nmehre unbekannte befehle,.-..\r\nSHA256:\r\n{SignString}\r\n \r\n \r\n \r\n \r\n ");
         }
 
         [TestMethod]
-        public void Format7()
+        [ExpectedException(typeof(ArgumentException))]
+        public void ScriptWrongCommand()
         {
-            var script = Resources.Script;
-            var connector = GetConnector(script);
-            var table = connector.GetTable();
+            var qconn = new QlikConnector($" PSEXCEUTE()\r\n  {Command}\r\n  \r\n  \r\n SHA256:\r\n{SignString}");
         }
     }
 }
