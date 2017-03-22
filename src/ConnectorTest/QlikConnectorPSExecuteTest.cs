@@ -21,48 +21,62 @@
             return new PSExecute(script);
         }
 
-        [TestMethod]
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithArguments()
         {
             var qconn = TestPSExecute($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object Name, Id\r\nSHA256:\r\n{SignString}");
         }
 
-        [TestMethod]
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithBreaksAndTabs()
         {
             var qconn = TestPSExecute($"PSEXECUTE()\r\n\t\t{Command}\r\n\t\tSHA256:\r\n{SignString}");
         }
 
-        [TestMethod]
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithUnixBreaks()
         {
             var qconn = TestPSExecute($" PSEXECUTE()\n  {Command}\n SHA256:\n{SignString}");
         }
 
-        [TestMethod]
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithNoArguments()
         {
             var qconn = TestPSExecute($" PSEXECUTE()\r\n  {Command}\r\n\r\n SHA256:\r\n{SignString}");
         }
 
-        [TestMethod]
+        [TestCategory("ScriptTest"), TestMethod]
+        public void ScriptWithPreTabs()
+        {
+            var qconn = TestPSExecute($"\r\n\t\t PSEXECUTE()\r\n  {Command}\r\n\r\n SHA256:\r\n{SignString}");
+        }
+
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithMoreBreaksAndArguments()
         {
             var qconn = TestPSExecute($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\n\r\n SHA256:\r\n{SignString}\r\n \r\n \r\n \r\n \r\n ");
         }
 
-        [TestMethod]
+        [TestCategory("ScriptTest"), TestMethod]
+        [ExpectedException(typeof(Exception))]
+        public void ScriptWrongCommand()
+        {
+            var qconn = TestPSExecute($" PSEXCEUTE()\r\n  {Command}\r\n  \r\n  \r\n SHA256:\r\n{SignString}");
+        }
+
+        [TestCategory("PowerShellTest"), TestMethod]
         [ExpectedException(typeof(PowerShellException))]
         public void ScriptWithUnknownArguments()
         {
             var qconn = TestPSExecute($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE\r\n{Command}\n\r\nmehre unbekannte befehle,.-..\r\nSHA256:\r\n{SignString}\r\n \r\n \r\n \r\n \r\n ");
+            var data = qconn.GetData();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void ScriptWrongCommand()
+        [TestCategory("PowerShellTest"), TestMethod]
+        public void GetDataFromScript()
         {
-            var qconn = TestPSExecute($" PSEXCEUTE()\r\n  {Command}\r\n  \r\n  \r\n SHA256:\r\n{SignString}");
+            var qconn = TestPSExecute($"PSEXECUTE()\r\n{Command}\r\nSHA256:\r\n{SignString}");
+            var data = qconn.GetData();
         }
     }
 }

@@ -25,10 +25,8 @@
             try
             {
                 var resultScript = new ScriptCode(script);
-                if (resultScript.Vaild())
-                    return resultScript;
-                else
-                    return null;
+                resultScript.Vaild();
+                return resultScript;
             }
             catch (Exception ex)
             {
@@ -38,27 +36,23 @@
         #endregion
 
         #region Methods
-        private bool Vaild()
+        private void Vaild()
         {
             try
             {
                 if (String.IsNullOrEmpty(OriginalScript))
                     throw new ArgumentException("The script is empty.");
 
-                if (!OriginalScript.Contains(ScriptCode.Algorithm))
-                    throw new ArgumentException("The signature was not found.");
-
-                //Genauer Prüfen
-                if (!OriginalScript.Contains(ScriptCode.ExecuteName))
-                    throw new ArgumentException($"The command {ScriptCode.ExecuteName} was not found.");
+                if (!OriginalScript.Trim().StartsWith(ExecuteName))
+                    throw new ArgumentException($"The command {ExecuteName} was not found.");
 
                 var text = OriginalScript.Trim().Replace("\r\n", "\n");
                 Code = Regex.Replace(text, $"{ExecuteName}[^\n]*\n", "", RegexOptions.Singleline).Trim();
                 if (Code.IndexOf(Algorithm) > -1)
                     Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
 
-                var Signature = Manager.SignWithPrivateKey(Code, false, false, Algorithm);
-                var fullSignature = $"{Algorithm}:\n{Signature}";
+                var signature = Manager.SignWithPrivateKey(Code, false, false, Algorithm);
+                var fullSignature = $"{Algorithm}:\r\n{signature}";
 
                 if (Code.IndexOf(Algorithm) > -1)
                     Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
@@ -83,11 +77,12 @@
                 if (Parameters == null)
                     Parameters = new Dictionary<string, string>();
 
-                return CryptoManager.IsValidPublicKey(Code, Signature, Manager.PublicKey);
+                if (!CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
+                    throw new Exception("The signature is not valid.");
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                throw new Exception("The script could not be read.", ex);
             }
         }
         #endregion
@@ -96,14 +91,12 @@
         public Dictionary<string, string> Parameters { get; private set; }
         public string Code { get; private set; }
         public string ScriptWithSign { get; private set; }
-        public string Signature { get; private set; }
-        public CryptoManager Manager { get; private set; }
 
-        public static string ExecuteName { get; private set; } = "PSEXECUTE";
-        public static string Algorithm { get; private set; } = "SHA256";
-        
+        private string ExecuteName { get; set; } = "PSEXECUTE";
+        private string Algorithm { get; set; } = "SHA256";
         private string OriginalScript { get; set; }
         private string PrivateKeyPath { get; set; } = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+        private CryptoManager Manager { get; set; }
         #endregion
     }
 }

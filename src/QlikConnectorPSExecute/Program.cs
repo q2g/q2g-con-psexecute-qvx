@@ -34,7 +34,8 @@
             else
             {
                 var script = ScriptCode.Parse(fargs.Object.Script);
-                var connector = new PSExecute(script);
+                var psExecute = new PSExecute(script);
+                var result = psExecute.GetData();
             }
         }
     }

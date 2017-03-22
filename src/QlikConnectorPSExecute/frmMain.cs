@@ -56,18 +56,6 @@
         {
             try
             {
-                if (String.IsNullOrEmpty(tbxSign.Text))
-                {
-                    ShowStatus("Please enter or paste a text.");
-                    return;
-                }
-
-                if (tbxSign.Text.Contains(ScriptCode.ExecuteName) == false)
-                {
-                    ShowStatus($"Please use a correct code with \"{ScriptCode.ExecuteName}\".");
-                    return;
-                }
-
                 var script = ScriptCode.Parse(tbxSign.Text);
                 Clipboard.SetText(script.ScriptWithSign);
                 tbxSign.Text = script.ScriptWithSign;

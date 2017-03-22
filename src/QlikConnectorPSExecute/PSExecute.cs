@@ -28,24 +28,30 @@
         #endregion
 
         #region Methods
-        public string GetTable()
+        public Dictionary<string, List<string>> GetData()
         {
             try
             {
-                //Table object reutrn
-
+                var result = new Dictionary<string, List<string>>();
                 using (var powerShell = PowerShell.Create())
                 {
                     powerShell.AddScript(Script.Code);
                     Script.Parameters.ToList().ForEach(p => powerShell.AddParameter(p.Key, p.Value));
 
                     var results = powerShell.Invoke();
-                        foreach (var psObject in results)
+                    foreach (var psObject in results)
                     {
                         foreach (var p in psObject.Properties)
                         {
-                            //Füllen
-                            Console.WriteLine($"{p.Name} = {p.Value.ToString()}");
+                            if (!result.ContainsKey(p.Name))
+                            {
+                                var values = new List<string>();
+                                result.Add(p.Name, values);
+                            }
+                            else
+                            {
+                                result[p.Name].Add(p.Value.ToString());
+                            }
                         }
                     }
 
@@ -57,11 +63,9 @@
                 }
 
                 if (Errors.Length > 0)
-                {
                     throw new Exception(Errors.ToString());
-                }
 
-                return null;
+                return result;
             }
             catch (Exception ex)
             {
