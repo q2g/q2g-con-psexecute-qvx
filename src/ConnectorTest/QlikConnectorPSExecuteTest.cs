@@ -6,7 +6,7 @@
     using QlikConnectorPSExecute;
     using System.IO;
     using ConnectorTest.Properties;
-
+    using QlikView.Qvx.QvxLibrary;
     #endregion
 
     [TestClass]
@@ -15,10 +15,10 @@
         private string Command { get; } = "Get-Process | Select-Object ProcessName, Handles, ID";
         private string SignString { get; } = "A45Wkb0gK+3CWMUyPMfNQpr6aeIAUx3PA8D3NlVd4cibWZi4Ba4SxAwrD4dzArS82tkVidbceRIN+AetQC7Xuo6Kf3a6wEMUrtqrjwe/w8Vqm4u3sPM8iFziEc2yBPA4U3SckHiDL6dv+lILBQXDJFvdF7lVOfGQeWSaDPU5hvV8RFTQtz01Nu937Q5DKRP8txSc1FxMiVXy8uMyPGSTPWohY7EBPiSqHagoBiO2rNv5VqV1hnjUvXKdSfkBLr0s+jXieZcgGE8TFTkH2Ok6tH5BZNjNQd4h6sKnlkdIjyjPr0ERVNbF9kaEKrWs9PE07VSx4qD+m1mO5ECyRro+9w==";
 
-        private PSExecute TestPSExecute(string script_text)
+        private QvxConnection TestPSExecute(string script_text)
         {
-            var script = ScriptCode.Parse(script_text);
-            return new PSExecute(script);
+            var server = new PSExecuteServer(script_text);
+            return server.CreateConnection();
         }
 
         [TestCategory("ScriptTest"), TestMethod]
@@ -69,14 +69,17 @@
         public void ScriptWithUnknownArguments()
         {
             var qconn = TestPSExecute($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE\r\n{Command}\n\r\nmehre unbekannte befehle,.-..\r\nSHA256:\r\n{SignString}\r\n \r\n \r\n \r\n \r\n ");
-            var data = qconn.GetData();
+           
         }
 
         [TestCategory("PowerShellTest"), TestMethod]
         public void GetDataFromScript()
         {
             var qconn = TestPSExecute($"PSEXECUTE()\r\n{Command}\r\nSHA256:\r\n{SignString}");
-            var data = qconn.GetData();
+            qconn.Init();
+
+            Assert.AreEqual(qconn.MTables.Count, 1);
+            var res = qconn.MTables[0].GetRows();
         }
     }
 }

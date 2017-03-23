@@ -1,11 +1,7 @@
 ﻿namespace QlikConnectorPSExecute
 {
-    using Fclp;
     #region Usings
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using System.Windows.Forms;
     #endregion
 
@@ -15,33 +11,18 @@
         /// Der Haupteinstiegspunkt für die Anwendung.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            var args = Environment.GetCommandLineArgs();
-            var fargs = new FluentCommandLineParser<AppArguments>();
-            var result = fargs.Parse(args);
-            if (result.HasErrors)
+            if (args != null && args.Length >= 2)
             {
-                return;
+                new PSExecuteServer(args[2]).Run(args[0], args[1]);
             }
-
-            if (result.EmptyArgs)
+            else
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new frmMain());
             }
-            else
-            {
-                var script = ScriptCode.Parse(fargs.Object.Script);
-                var psExecute = new PSExecute(script);
-                var result = psExecute.GetData();
-            }
         }
-    }
-
-    public class AppArguments
-    {
-        public string Script { get; private set; }
     }
 }

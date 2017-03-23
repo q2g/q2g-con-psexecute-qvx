@@ -1,0 +1,58 @@
+﻿.qveventlogconnectdialogcontainer {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	z-index: 1021;
+	background-color: rgba(0, 0, 0, 0.3);
+}
+.qveventlogconnectdialog {
+	position: relative;
+	top: 100px;
+	margin: auto;
+	width: 300px;
+	
+	background-color: white;
+	border: 2px solid #898B8C;
+
+	padding: 10px;
+}
+
+.qveventlogconnectdialog h1 {
+	font-size: 16px;
+	padding-top: 10px;
+}
+
+.qveventlogconnectdialog h2 {
+	font-size: 14px;
+	padding-top: 10px;
+}
+
+.qveventlogconnectdialog .main input {
+	display: block;
+	margin-top: 5px;
+}
+
+.connectionInfo {
+	padding-top: 10px;
+	color: red;
+}
+
+.connectionInfo.success {
+	color: green;
+}
+
+.qveventlogconnectdialog .footer {
+	text-align: right;
+	padding-top: 15px;
+}
+
+.qveventlogconnectdialog .footer button {
+	display: inline-block;
+	padding: 5px 10px;
+}
+
+.qveventlogconnectdialog .footer button[disabled=disabled] {
+	color: lightgrey;
+}
