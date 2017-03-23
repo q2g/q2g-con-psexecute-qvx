@@ -79,7 +79,23 @@
             qconn.Init();
 
             Assert.AreEqual(qconn.MTables.Count, 1);
-            var res = qconn.MTables[0].GetRows();
+
+            var fields = qconn.MTables[0].Fields.Length;
+            Assert.AreEqual(fields, 3);
+
+            int count = 0;
+            var res = qconn.MTables[0].GetRows().GetEnumerator();
+            while (res.MoveNext()) { count++; }
+            Assert.AreEqual(count > 10, true);
+        }
+
+        [TestCategory("PowerShellTest"), TestMethod]
+        public void CheckTestConnection()
+        {
+            var script = $"PSEXECUTE()\r\n{Command}\r\nSHA256:\r\n{SignString}";
+            var server = new PSExecuteServer(script);
+            var response = server.TestConnection("jsonbourne", "everest") as Info;
+            Assert.AreEqual(response.qMessage, "Credentials OK!");
         }
     }
 }

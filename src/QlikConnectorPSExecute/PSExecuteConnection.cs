@@ -1,14 +1,15 @@
-﻿using QlikView.Qvx.QvxLibrary;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Management.Automation;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QlikConnectorPSExecute
+﻿namespace QlikConnectorPSExecute
 {
+    #region Usings
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Linq;
+    using System.Text;
+    using QlikView.Qvx.QvxLibrary;
+    using System.Management.Automation;
+    #endregion
+
     public class PSExecuteConnection : QvxConnection
     {
         #region Constructor & Init
