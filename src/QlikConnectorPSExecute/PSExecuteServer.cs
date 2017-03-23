@@ -62,7 +62,7 @@
 
         public bool VerifyCredentials(string username, string password)
         {
-            return (username == "" && password == "") || (username == "cat" && password == "");
+            return (username == "" && password == "") || (username == "jsonbourne" && password == "everest");
         }
 
         public QvDataContractResponse GetInfo()

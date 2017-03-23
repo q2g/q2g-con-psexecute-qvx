@@ -9,11 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>QlikConnectorPSExecute</RootNamespace>
     <AssemblyName>QlikConnectorPSExecute</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <TargetFrameworkProfile />
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -69,13 +69,12 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BouncyCastle.Crypto, Version=1.8.1.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\CryptoManager\bin\Debug\BouncyCastle.Crypto.dll</HintPath>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>..\..\..\..\Frameworks\BouncyCastle_1.8.1\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Frameworks\JSON\Json.601\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\Frameworks\JSON\Json.601\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="QvxLibrary">
       <HintPath>..\..\..\..\Frameworks\QvxSDK_2.1_x64\QvxLibrary.dll</HintPath>
@@ -87,7 +86,7 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management.Automation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Management.Automation.6.1.7601.17515\lib\net45\System.Management.Automation.dll</HintPath>
+      <HintPath>..\packages\System.Management.Automation.6.1.7601.17515\lib\net40\System.Management.Automation.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
@@ -134,6 +133,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="verpatch.exe" />
     <Content Include="web\connectdialog.css" />
     <Content Include="web\connectdialog.js" />
     <Content Include="web\connectdialog.ng.html" />
@@ -153,7 +153,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)web\*.*" "$(ProjectDir)bin\$(ConfigurationName)\web\" /e /y /i /r /q</PostBuildEvent>
+    <PostBuildEvent>"$(ProjectDir)verpatch.exe" "$(TargetPath)" /s "QlikView Connector" "PS Execute Connector"
+xcopy "$(ProjectDir)web\*.*" "$(ProjectDir)bin\$(ConfigurationName)\web\" /e /y /i /r /q</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
