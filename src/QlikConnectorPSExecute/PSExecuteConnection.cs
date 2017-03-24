@@ -12,35 +12,40 @@
 
     public class PSExecuteConnection : QvxConnection
     {
-        #region Constructor & Init
-        public PSExecuteConnection(ScriptCode code)
-        {
-            Script = code;
-        }
-
-        public override void Init()
-        {
-            TableData = GetData();
-
-            var eventLogFields = new List<QvxField>();
-            foreach (DataColumn column in TableData.Columns)
-            {
-                eventLogFields.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
-            }
-
-            MTables = new List<QvxTable>()
-            {
-                new QvxTable()
-                {
-                    TableName = "PSExecute",
-                    GetRows = GetPowerShellResult,
-                    Fields = eventLogFields.ToArray(),
-                }
-            };
-        }
+        #region Init
+        public override void Init() { }
         #endregion
 
         #region Methods
+        public void ScriptInit(string script)
+        {
+            try
+            {
+                Script = ScriptCode.Parse(script);
+                TableData = GetData();
+
+                var eventLogFields = new List<QvxField>();
+                foreach (DataColumn column in TableData.Columns)
+                {
+                    eventLogFields.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
+                }
+
+                MTables = new List<QvxTable>()
+                {
+                    new QvxTable()
+                    {
+                        TableName = "PSExecute",
+                        GetRows = GetPowerShellResult,
+                        Fields = eventLogFields.ToArray(),
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("The script could not be initialized.", ex);
+            }
+        }
+
         private IEnumerable<QvxDataRow> GetPowerShellResult()
         {
             var table = new QvxTable();
@@ -65,6 +70,9 @@
         {
             try
             {
+                if(Script == null)
+                    return new DataTable();
+
                 var resultTable = new DataTable();
                 using (var powerShell = PowerShell.Create())
                 {
@@ -116,6 +124,7 @@
         private DataTable TableData { get; set; }
         private ScriptCode Script { get; set; }
         private StringBuilder Errors { get; set; } = new StringBuilder();
+        public string Command { get; private set; }
         #endregion
     }
 

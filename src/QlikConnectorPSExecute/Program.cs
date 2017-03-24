@@ -15,7 +15,7 @@
         {
             if (args != null && args.Length >= 2)
             {
-                new PSExecuteServer(args[2]).Run(args[0], args[1]);
+                new PSExecuteServer().Run(args[0], args[1]);
             }
             else
             {

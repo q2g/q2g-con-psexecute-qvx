@@ -7,17 +7,10 @@
 
     public class PSExecuteServer : QvxServer
     {
-        #region Constructor
-        public PSExecuteServer(string script)
-        {
-            Script = ScriptCode.Parse(script);
-        }
-        #endregion
-
         #region Methods
         public override QvxConnection CreateConnection()
         {
-            return new PSExecuteConnection(Script);
+            return new PSExecuteConnection();
         }
 
         public override string CreateConnectionString()
@@ -37,20 +30,23 @@
 
             switch (method)
             {
-                case "getInfo":
+                case "GetInfo":
                     response = GetInfo();
                     break;
-                case "getDatabases":
+                case "GetDatabases":
                     response = GetDatabases(username, password);
                     break;
-                case "getTables":
+                case "GetTables":
                     response = GetTables(username, password, connection, userParameters[0], userParameters[1]);
                     break;
-                case "getFields":
+                case "GetFields":
                     response = GetFields(username, password, connection, userParameters[0], userParameters[1], userParameters[2]);
                     break;
-                case "testConnection":
+                case "TestConnection":
                     response = TestConnection(userParameters[0], userParameters[1]);
+                    break;
+                case "LoadScript":
+                    response = LoadScript(userParameters[0], userParameters[1], userParameters[2], connection);
                     break;
                 default:
                     response = new Info { qMessage = "Unknown command" };
@@ -60,16 +56,46 @@
             return ToJson(response);
         }
 
+        public QvDataContractResponse LoadScript(string username, string passwort, string command, QvxConnection connection)
+        {
+            try
+            {
+                var res = "FAIL";
+                if (username == "json" && passwort == "1q2w3e")
+                {
+                    var psconn = connection as PSExecuteConnection;
+                    psconn.ScriptInit(command);
+                    res = $"SUCCESS";
+                }
+
+                return new Info { qMessage = res };
+            }
+            catch (Exception ex)
+            {
+                return new Info { qMessage = GetMessages(ex) };
+            }
+        }
+
+        private string GetMessages(Exception e)
+        {
+            var msgs = String.Empty;
+            if (e == null) return String.Empty;
+            if (msgs == "") msgs = e.Message;
+            if (e.InnerException != null)
+                msgs += $"\r\nInnerException: {GetMessages(e.InnerException)}";
+            return msgs;
+        }
+
         public bool VerifyCredentials(string username, string password)
         {
-            return (username == "" && password == "") || (username == "jsonbourne" && password == "everest");
+            return (username == "" && password == "") || (username == "json" && password == "1q2w3e");
         }
 
         public QvDataContractResponse GetInfo()
         {
             return new Info
             {
-                qMessage = "Example connector for Windows Event Log. Use account sdk-user/sdk-password"
+                qMessage = "Connector for Windows PowerShell. Run a PowerShell command."
             };
         }
 
@@ -122,10 +148,6 @@
             }
             return new Info { qMessage = message };
         }
-        #endregion
-
-        #region Properties & Variables
-        private ScriptCode Script { get; set; }
         #endregion
     }
 }

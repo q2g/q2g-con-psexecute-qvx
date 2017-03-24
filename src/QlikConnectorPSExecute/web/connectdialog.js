@@ -8,18 +8,19 @@
 			function init() {
 				$scope.isEdit = input.editMode;
 				$scope.id = input.instanceId;
-				$scope.titleText = $scope.isEdit ? "Change QV Event Log connection" : "Add QV Event Log connection";
+				$scope.titleText = $scope.isEdit ? "Change PowerShell connection" : "Add PowerShell connection";
 				$scope.saveButtonText = $scope.isEdit ? "Save changes" : "Create";
 
-				$scope.name = "";
+				$scope.name = ""; //Connection entfernt auf HTML!!!
 				$scope.username = "";
 				$scope.password = "";
+				$scope.commandText = "";
 				$scope.provider = "QlikConnectorPSExecute.exe";
 				$scope.connectionInfo = "";
 				$scope.connectionSuccessful = false;
 				$scope.connectionString = createCustomConnectionString($scope.provider, "host=localhost;");
 
-				input.serverside.sendJsonRequest( "getInfo" ).then( function ( info ) {
+				input.serverside.sendJsonRequest( "GetInfo" ).then( function ( info ) {
 					$scope.info = info.qMessage;
 				} );
 
@@ -35,7 +36,7 @@
 
 			$scope.onOKClicked = function () {
 				if ( $scope.isEdit ) {
-					var overrideCredentials = ( $scope.username !== "" && $scope.password !== "" );
+					var overrideCredentials = $scope.username !== "" && $scope.password !== "";
 					input.serverside.modifyConnection( $scope.id,
 						$scope.name,
 						$scope.connectionString,
@@ -54,9 +55,9 @@
 			};
 
 			$scope.onTestConnectionClicked = function () {
-				input.serverside.sendJsonRequest( "testConnection", $scope.username, $scope.password ).then( function ( info ) {
+                    input.serverside.sendJsonRequest("LoadScript", $scope.username, $scope.password, $scope.commandText).then(function (info) {
 					$scope.connectionInfo = info.qMessage;
-					$scope.connectionSuccessful = info.qMessage.indexOf( "OK" ) !== -1;
+					$scope.connectionSuccessful = info.qMessage.indexOf( "SUCCESS" ) !== -1;
 				} );
 			};
 
@@ -74,7 +75,6 @@
 			function createCustomConnectionString ( filename, connectionstring ) {
 				return "CUSTOM CONNECT TO " + "\"provider=" + filename + ";" + connectionstring + "\"";
 			}
-
 
 			init();
 		}]

@@ -7,6 +7,8 @@
     using System.IO;
     using ConnectorTest.Properties;
     using QlikView.Qvx.QvxLibrary;
+    using System.Collections.Generic;
+    using Newtonsoft.Json;
     #endregion
 
     [TestClass]
@@ -17,8 +19,10 @@
 
         private QvxConnection TestPSExecute(string script_text)
         {
-            var server = new PSExecuteServer(script_text);
-            return server.CreateConnection();
+            var server = new PSExecuteServer();
+            var conn = server.CreateConnection() as PSExecuteConnection;
+            conn.ScriptInit(script_text);
+            return conn;
         }
 
         [TestCategory("ScriptTest"), TestMethod]
@@ -93,9 +97,17 @@
         public void CheckTestConnection()
         {
             var script = $"PSEXECUTE()\r\n{Command}\r\nSHA256:\r\n{SignString}";
-            var server = new PSExecuteServer(script);
-            var response = server.TestConnection("jsonbourne", "everest") as Info;
-            Assert.AreEqual(response.qMessage, "Credentials OK!");
+            var server = new PSExecuteServer();
+            var conn = server.CreateConnection();
+            conn.MParameters = new Dictionary<string, string>();
+            conn.MParameters.Add("userid", "json");
+            conn.MParameters.Add("password", "1q2w3e");
+            conn.MParameters.Add("command", script);
+            conn.Init();
+
+            var result = server.HandleJsonRequest("LoadScript", new string[] { "json", "1q2w3e", script }, conn);
+            var json = JsonConvert.DeserializeObject<Info>(result);
+            Assert.AreEqual(json.qMessage, "SUCCESS");
         }
     }
 }
