@@ -8,6 +8,7 @@
     public class PSExecuteServer : QvxServer
     {
         #region Methods
+
         public override QvxConnection CreateConnection()
         {
             return new PSExecuteConnection();

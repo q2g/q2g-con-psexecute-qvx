@@ -60,4 +60,5 @@
 textarea {
   width: 495px;
   height: 200px;
+  resize: none;
 }
