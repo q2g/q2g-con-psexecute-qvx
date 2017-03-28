@@ -134,10 +134,21 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="verpatch.exe" />
-    <Content Include="web\connectdialog.css" />
-    <Content Include="web\connectdialog.js" />
-    <Content Include="web\connectdialog.ng.html" />
-    <Content Include="web\selectdialog.js" />
+    <Content Include="web\connectdialog.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="web\connectdialog.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="web\connectdialog.ng.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="web\connector-main.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="web\selectdialog.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -154,7 +165,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>"$(ProjectDir)verpatch.exe" "$(TargetPath)" /s "QlikView Connector" "PS Execute Connector"
-xcopy "$(ProjectDir)web\*.*" "$(ProjectDir)bin\$(ConfigurationName)\web\" /e /y /i /r /q</PostBuildEvent>
+xcopy "$(TargetDir)*.*" "C:\Program Files\Common Files\Qlik\Custom Data\QlikConnectorPSExecute\*.*" /e /y /i /r /q</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
