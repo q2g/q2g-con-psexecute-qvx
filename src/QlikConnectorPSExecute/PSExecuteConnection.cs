@@ -18,42 +18,18 @@
         #endregion
 
         #region Methods
-        public void ScriptInit(string script)
+        private QvxTable.GetRowsHandler GetPowerShellResult(DataTable data)
         {
-            try
+            return () =>
             {
-                Script = ScriptCode.Parse(script);
-                TableData = GetData();
-
-                var eventLogFields = new List<QvxField>();
-                foreach (DataColumn column in TableData.Columns)
+                var result = new List<QvxDataRow>();
+                foreach (DataRow row in data.Rows)
                 {
-                    eventLogFields.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
+                    result.Add(MakeEntry(row, FindTable("PSExecute", MTables)));
                 }
 
-                MTables = new List<QvxTable>()
-                {
-                    new QvxTable()
-                    {
-                        TableName = "PSExecute",
-                        GetRows = GetPowerShellResult,
-                        Fields = eventLogFields.ToArray(),
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("The script could not be initialized.", ex);
-            }
-        }
-
-        private IEnumerable<QvxDataRow> GetPowerShellResult()
-        {
-            var table = new QvxTable();
-            foreach (DataRow row in TableData.Rows)
-            {
-                yield return MakeEntry(row, FindTable("PSExecute", MTables));
-            }
+                return result;
+            };
         }
 
         private QvxDataRow MakeEntry(DataRow dataRow, QvxTable table)
@@ -67,18 +43,18 @@
             return row;
         }
 
-        private DataTable GetData()
+        private DataTable GetData(ScriptCode script)
         {
             try
             {
-                if(Script == null)
+                if (script == null)
                     return new DataTable();
 
                 var resultTable = new DataTable();
                 using (var powerShell = PowerShell.Create())
                 {
-                    powerShell.AddScript(Script.Code);
-                    Script.Parameters.ToList().ForEach(p => powerShell.AddParameter(p.Key, p.Value));
+                    powerShell.AddScript(script.Code);
+                    script.Parameters.ToList().ForEach(p => powerShell.AddParameter(p.Key, p.Value));
 
                     var results = powerShell.Invoke();
                     foreach (var psObject in results)
@@ -115,44 +91,61 @@
             }
         }
 
-        private QvxField[] fields;
+        //private QvxField[] fields;
 
-        private IEnumerable<QvxDataRow> GetData2()
-        {            
-            var row = new QvxDataRow();
-            row[fields[0]] = "MEIN TEXT";
+        //private IEnumerable<QvxDataRow> GetData2()
+        //{            
+        //    var row = new QvxDataRow();
+        //    row[fields[0]] = "MEIN TEXT";
 
-            var dd = row[fields[0]] as QvxDataValue;
-            
+        //    var dd = row[fields[0]] as QvxDataValue;
 
-            return new List<QvxDataRow>() { row };          
-        }
+
+        //    return new List<QvxDataRow>() { row };          
+        //}
+
+
 
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
-            fields = new QvxField[1];
+            var script = ScriptCode.Parse(query);
+            var data = GetData(script);
 
-            fields[0] = new QvxField("tt", QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII);
+            var fields = new List<QvxField>();
+            foreach (DataColumn column in data.Columns)
+            {
+                fields.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
+            }
 
-            var tb = new QvxTable() {
-                TableName = query.Substring(0, 5),
-                Fields = fields,
-                GetRows = GetData2
+            var table = new QvxTable()
+            {
+                TableName = "PSEXECUTE",
+                Fields = fields.ToArray(),
+                GetRows = GetPowerShellResult(data),
             };
 
-            var dtb = new QvxDataTable(tb);
-            
-            File.WriteAllText(@"C:\Users\MBerthold\Downloads\Log.txt", $"TEXT: {dd.ToString()}");
+            var result = new QvxDataTable(table);
+            result.Select(fields.ToArray());
 
-            return new QvxDataTable(tb);
+            //fields = new QvxField[1];
+
+            //fields[0] = new QvxField("tt", QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII);
+
+            //var tb = new QvxTable() {
+            //    TableName = query.Substring(0, 5),
+            //    Fields = fields,
+            //    GetRows = GetData2
+            //};
+
+            return result;
         }
         #endregion
 
         #region Properties & Variables
-        private DataTable TableData { get; set; }
-        private ScriptCode Script { get; set; }
+        //private DataTable TableData { get; set; }
+        //private ScriptCode Script { get; set; }
         private StringBuilder Errors { get; set; } = new StringBuilder();
-        public string Command { get; private set; }
+        //public string Command { get; private set; }
         #endregion
     }
 

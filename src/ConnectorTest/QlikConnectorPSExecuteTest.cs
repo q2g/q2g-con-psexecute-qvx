@@ -21,7 +21,7 @@
         {
             var server = new PSExecuteServer();
             var conn = server.CreateConnection() as PSExecuteConnection;
-            conn.ScriptInit(script_text);
+            //conn.ScriptInit(script_text);
             return conn;
         }
 
