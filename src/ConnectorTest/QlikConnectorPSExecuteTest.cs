@@ -74,6 +74,7 @@
         {
             var qconn = TestPSExecute($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE\r\n{Command}\n\r\nmehre unbekannte befehle,.-..\r\nSHA256:\r\n{SignString}\r\n \r\n \r\n \r\n \r\n ");
             qconn.Init();
+         
         }
 
         [TestCategory("PowerShellTest"), TestMethod]
@@ -108,6 +109,13 @@
             var result = server.HandleJsonRequest("LoadScript", new string[] { "json", "1q2w3e", script }, conn);
             var json = JsonConvert.DeserializeObject<Info>(result);
             Assert.AreEqual(json.qMessage, "SUCCESS");
+        }
+
+        [TestCategory("QlikConnection"), TestMethod]
+        public void CreateConnection()
+        {
+            var server = new PSExecuteServer();
+            server.CreateConnection();
         }
     }
 }

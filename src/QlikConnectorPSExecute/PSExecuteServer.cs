@@ -46,9 +46,6 @@
                 case "TestConnection":
                     response = TestConnection(userParameters[0], userParameters[1]);
                     break;
-                case "LoadScript":
-                    response = LoadScript(userParameters[0], userParameters[1], userParameters[2], connection);
-                    break;
                 default:
                     response = new Info { qMessage = "Unknown command" };
                     break;
@@ -96,7 +93,7 @@
         {
             return new Info
             {
-                qMessage = "Connector for Windows PowerShell. Run a PowerShell command."
+                qMessage = "Connector for Windows PowerShell."
             };
         }
 
@@ -104,6 +101,9 @@
         {
             if (VerifyCredentials(username, password))
             {
+                //command???
+                //LoadScript(username, password, null, connection);
+
                 return new QvDataContractDatabaseListResponse
                 {
                     qDatabases = new Database[]
@@ -112,7 +112,8 @@
                     }
                 };
             }
-            return new Info { qMessage = "Credentials WRONG!" };
+
+            return new Info { qMessage = "Credentials FAIL!" };
         }
 
         public QvDataContractResponse GetTables(string username, string password, QvxConnection connection, string database, string owner)
@@ -142,10 +143,10 @@
 
         public QvDataContractResponse TestConnection(string username, string password)
         {
-            var message = "Credentials WRONG!";
+            var message = "Credentials FAIL";
             if (VerifyCredentials(username, password))
             {
-                message = "Credentials OK!";
+                message = "Credentials SUCCESS";
             }
             return new Info { qMessage = message };
         }

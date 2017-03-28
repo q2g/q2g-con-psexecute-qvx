@@ -5,13 +5,15 @@
 	return {
 		template: template,
 		controller: ['$scope', 'input', function ( $scope, input ) {
-			function init() {
+
+		    /*Initialize*/
+		    function init() {
 				$scope.isEdit = input.editMode;
 				$scope.id = input.instanceId;
 				$scope.titleText = $scope.isEdit ? "Change PowerShell connection" : "Add PowerShell connection";
 				$scope.saveButtonText = $scope.isEdit ? "Save changes" : "Create";
 
-				$scope.name = ""; //Connection entfernt auf HTML!!!
+				$scope.name = "";
 				$scope.username = "";
 				$scope.password = "";
 				$scope.commandText = "";
@@ -26,36 +28,48 @@
 
 				if ( $scope.isEdit ) {
 					input.serverside.getConnection( $scope.id ).then( function ( result ) {
-						$scope.name = result.qName;
+					    $scope.name = result.qConnection.qName;
 					} );
 				}
 			}
 
-
 			/* Event handlers */
+		    $scope.onOKClicked = function () {
 
-			$scope.onOKClicked = function () {
-				if ( $scope.isEdit ) {
-					var overrideCredentials = $scope.username !== "" && $scope.password !== "";
-					input.serverside.modifyConnection( $scope.id,
-						$scope.name,
-						$scope.connectionString,
-						$scope.provider,
-						overrideCredentials,
-						$scope.username,
-						$scope.password ).then( function ( result ) {
-							if ( result ) {
-								$scope.destroyComponent();
-							}
-						} );
-				} else {
-					input.serverside.createNewConnection( $scope.name, $scope.connectionString, $scope.username, $scope.password);
-					$scope.destroyComponent();
-				}
+		        if ($scope.name == "") {
+		            $scope.connectionInfo = "Please enter a name for the connection.";
+		        }
+		        else if($scope.username == "")
+		        {
+		            $scope.connectionInfo = "Please enter the user name.";
+		        }
+		        else if ($scope.password == "") {
+		            $scope.connectionInfo = "Please enter the password.";
+		        }
+		        else {
+		            if ($scope.isEdit) {
+		                var overrideCredentials = $scope.username !== "" && $scope.password !== "";
+		                input.serverside.modifyConnection($scope.id,
+                            $scope.name,
+                            $scope.connectionString,
+                            $scope.provider,
+                            overrideCredentials,
+                            $scope.username,
+                            $scope.password).then(function (result) {
+                                if (result) {
+                                    $scope.destroyComponent();
+                                }
+                            });
+		            } else {
+		                input.serverside.createNewConnection($scope.name, $scope.connectionString, $scope.username, $scope.password);
+		                $scope.destroyComponent();
+		            }
+		        }
+		    
 			};
 
 			$scope.onTestConnectionClicked = function () {
-                    input.serverside.sendJsonRequest("LoadScript", $scope.username, $scope.password, $scope.commandText).then(function (info) {
+			    input.serverside.sendJsonRequest("TestConnection", $scope.username, $scope.password, $scope.commandText).then(function (info) {
 					$scope.connectionInfo = info.qMessage;
 					$scope.connectionSuccessful = info.qMessage.indexOf( "SUCCESS" ) !== -1;
 				} );
@@ -70,8 +84,7 @@
 			};
 
 			
-			/* Helper functions */
-
+			/* Create ConnectionString */
 			function createCustomConnectionString ( filename, connectionstring ) {
 				return "CUSTOM CONNECT TO " + "\"provider=" + filename + ";" + connectionstring + "\"";
 			}
