@@ -22,13 +22,13 @@
 				$scope.connectionSuccessful = false;
 				$scope.connectionString = createCustomConnectionString($scope.provider, "host=localhost;");
 
-				input.serverside.sendJsonRequest( "GetInfo" ).then( function ( info ) {
+				input.serverside.sendJsonRequest( "getInfo" ).then( function ( info ) {
 					$scope.info = info.qMessage;
 				} );
 
 				if ( $scope.isEdit ) {
-					input.serverside.getConnection( $scope.id ).then( function ( result ) {
-					    $scope.name = result.qConnection.qName;
+				    input.serverside.getConnection($scope.id).then(function (result) {
+                        $scope.name = result.qConnection.qName;
 					} );
 				}
 			}
@@ -69,7 +69,7 @@
 			};
 
 			$scope.onTestConnectionClicked = function () {
-			    input.serverside.sendJsonRequest("TestConnection", $scope.username, $scope.password, $scope.commandText).then(function (info) {
+			    input.serverside.sendJsonRequest("testConnection", $scope.username, $scope.password).then(function (info) {
 					$scope.connectionInfo = info.qMessage;
 					$scope.connectionSuccessful = info.qMessage.indexOf( "SUCCESS" ) !== -1;
 				} );

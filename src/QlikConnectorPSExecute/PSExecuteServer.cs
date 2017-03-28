@@ -31,19 +31,19 @@
 
             switch (method)
             {
-                case "GetInfo":
+                case "getInfo":
                     response = GetInfo();
                     break;
-                case "GetDatabases":
+                case "getDatabases":
                     response = GetDatabases(username, password);
                     break;
-                case "GetTables":
-                    response = GetTables(username, password, connection, userParameters[0], userParameters[1]);
+                case "getTables":
+                    response = GetTables(username, password, connection, userParameters[0], userParameters[1], userParameters[2]);
                     break;
-                case "GetFields":
+                case "getFields":
                     response = GetFields(username, password, connection, userParameters[0], userParameters[1], userParameters[2]);
                     break;
-                case "TestConnection":
+                case "testConnection":
                     response = TestConnection(userParameters[0], userParameters[1]);
                     break;
                 default:
@@ -101,9 +101,6 @@
         {
             if (VerifyCredentials(username, password))
             {
-                //command???
-                //LoadScript(username, password, null, connection);
-
                 return new QvDataContractDatabaseListResponse
                 {
                     qDatabases = new Database[]
@@ -116,10 +113,12 @@
             return new Info { qMessage = "Credentials FAIL!" };
         }
 
-        public QvDataContractResponse GetTables(string username, string password, QvxConnection connection, string database, string owner)
+        public QvDataContractResponse GetTables(string username, string password, QvxConnection connection, string database, string owner, string command)
         {
             if (VerifyCredentials(username, password))
             {
+                LoadScript(username, password, command, connection);
+
                 return new QvDataContractTableListResponse
                 {
                     qTables = connection.MTables

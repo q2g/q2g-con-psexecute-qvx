@@ -110,12 +110,5 @@
             var json = JsonConvert.DeserializeObject<Info>(result);
             Assert.AreEqual(json.qMessage, "SUCCESS");
         }
-
-        [TestCategory("QlikConnection"), TestMethod]
-        public void CreateConnection()
-        {
-            var server = new PSExecuteServer();
-            server.CreateConnection();
-        }
     }
 }

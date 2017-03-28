@@ -8,6 +8,7 @@
     using System.Text;
     using QlikView.Qvx.QvxLibrary;
     using System.Management.Automation;
+    using System.IO;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
@@ -114,9 +115,36 @@
             }
         }
 
+        private QvxField[] fields;
+
+        private IEnumerable<QvxDataRow> GetData2()
+        {            
+            var row = new QvxDataRow();
+            row[fields[0]] = "MEIN TEXT";
+
+            var dd = row[fields[0]] as QvxDataValue;
+            
+
+            return new List<QvxDataRow>() { row };          
+        }
+
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
-            return base.ExtractQuery(query, tables);
+            fields = new QvxField[1];
+
+            fields[0] = new QvxField("tt", QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII);
+
+            var tb = new QvxTable() {
+                TableName = query.Substring(0, 5),
+                Fields = fields,
+                GetRows = GetData2
+            };
+
+            var dtb = new QvxDataTable(tb);
+            
+            File.WriteAllText(@"C:\Users\MBerthold\Downloads\Log.txt", $"TEXT: {dd.ToString()}");
+
+            return new QvxDataTable(tb);
         }
         #endregion
 
