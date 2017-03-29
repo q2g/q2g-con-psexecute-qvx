@@ -49,7 +49,7 @@
                 if (Code.IndexOf(Algorithm) > -1)
                     Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
 
-                var signature = Manager.SignWithPrivateKey(Code, false, false, Algorithm);
+                var signature = Manager.SignWithPrivateKey(Code, false, true, Algorithm);
                 var fullSignature = $"{Algorithm}:\r\n{signature}";
 
                 if (Code.IndexOf(Algorithm) > -1)
@@ -75,6 +75,10 @@
                 if (Parameters == null)
                     Parameters = new Dictionary<string, string>();
 
+                TableName = Regex.Match(text, $"({ExecuteName}[^\\)]*\\))", RegexOptions.Singleline).Groups[1].Value;
+                if (String.IsNullOrEmpty(TableName))
+                    TableName = ExecuteName;
+
                 if (!CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
                     throw new Exception("The signature is not valid.");
             }
@@ -89,6 +93,7 @@
         public Dictionary<string, string> Parameters { get; private set; }
         public string Code { get; private set; }
         public string ScriptWithSign { get; private set; }
+        public string TableName { get; private set; }
 
         private string ExecuteName { get; set; } = "PSEXECUTE";
         private string Algorithm { get; set; } = "SHA256";

@@ -16,7 +16,6 @@
 				$scope.name = "";
 				$scope.username = "";
 				$scope.password = "";
-				$scope.commandText = "";
 				$scope.provider = "QlikConnectorPSExecute.exe";
 				$scope.connectionInfo = "";
 				$scope.connectionSuccessful = false;

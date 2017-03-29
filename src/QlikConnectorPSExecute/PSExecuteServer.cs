@@ -54,26 +54,6 @@
             return ToJson(response);
         }
 
-        //public QvDataContractResponse LoadScript(string username, string passwort, string command, QvxConnection connection)
-        //{
-        //    try
-        //    {
-        //        var res = "FAIL";
-        //        if (username == "json" && passwort == "1q2w3e")
-        //        {
-        //            var psconn = connection as PSExecuteConnection;
-        //            psconn.ScriptInit(command);
-        //            res = $"SUCCESS";
-        //        }
-
-        //        return new Info { qMessage = res };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new Info { qMessage = GetMessages(ex) };
-        //    }
-        //}
-
         private string GetMessages(Exception e)
         {
             var msgs = String.Empty;

@@ -18,30 +18,27 @@
         #endregion
 
         #region Methods
-        private QvxTable.GetRowsHandler GetPowerShellResult(DataTable data)
+        private IEnumerable<QvxDataRow> GetPowerShellResult()
         {
-            return () =>
+            var result = new List<QvxDataRow>();
+            foreach (DataRow dataRow in internalData.Rows)
             {
-                var result = new List<QvxDataRow>();
-                foreach (DataRow row in data.Rows)
+                var row = new QvxDataRow();
+                for (int i = 0; i < dataRow.ItemArray.Length; i++)
                 {
-                    result.Add(MakeEntry(row, FindTable("PSExecute", MTables)));
+                    row[fields[i]] = dataRow[i].ToString();
                 }
-
-                return result;
-            };
-        }
-
-        private QvxDataRow MakeEntry(DataRow dataRow, QvxTable table)
-        {
-            var row = new QvxDataRow();
-            for (int i = 0; i < dataRow.ItemArray.Length; i++)
-            {
-                row[table.Fields[i]] = dataRow[i].ToString();
+                
+                result.Add(row);
             }
 
-            return row;
-        }
+            return result;
+        }       
+
+        //private void LogTest(string content)
+        //{
+        //    File.WriteAllText(@"C:\Users\MBerthold\Downloads\Log.txt", content);
+        //}
 
         private DataTable GetData(ScriptCode script)
         {
@@ -66,7 +63,6 @@
                             {
                                 resultTable.Columns.Add(p.Name);
                             }
-
                             row[p.Name] = p.Value.ToString();
                         }
 
@@ -87,65 +83,41 @@
             }
             catch (Exception ex)
             {
-                throw new PowerShellException("The PowerShell script can not be execute.", ex);
+                throw new PowerShellException("The PowerShell script can not be executed.", ex);
             }
         }
 
-        //private QvxField[] fields;
-
-        //private IEnumerable<QvxDataRow> GetData2()
-        //{            
-        //    var row = new QvxDataRow();
-        //    row[fields[0]] = "MEIN TEXT";
-
-        //    var dd = row[fields[0]] as QvxDataValue;
-
-
-        //    return new List<QvxDataRow>() { row };          
-        //}
-
-
+        private DataTable internalData;
+        private QvxField[] fields;
 
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
             var script = ScriptCode.Parse(query);
-            var data = GetData(script);
+            internalData = GetData(script);
 
-            var fields = new List<QvxField>();
-            foreach (DataColumn column in data.Columns)
+            var fieldsl = new List<QvxField>();
+            foreach (DataColumn column in internalData.Columns)
             {
-                fields.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
+                fieldsl.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
             }
+            fields = fieldsl.ToArray();
 
             var table = new QvxTable()
             {
-                TableName = "PSEXECUTE",
-                Fields = fields.ToArray(),
-                GetRows = GetPowerShellResult(data),
+                TableName = script.TableName, // TODO als Name das PSEXCUTE mit Argumenten
+                Fields = fields,
+                GetRows = GetPowerShellResult
             };
 
             var result = new QvxDataTable(table);
-            result.Select(fields.ToArray());
-
-            //fields = new QvxField[1];
-
-            //fields[0] = new QvxField("tt", QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII);
-
-            //var tb = new QvxTable() {
-            //    TableName = query.Substring(0, 5),
-            //    Fields = fields,
-            //    GetRows = GetData2
-            //};
+            result.Select(fields);
 
             return result;
         }
         #endregion
 
         #region Properties & Variables
-        //private DataTable TableData { get; set; }
-        //private ScriptCode Script { get; set; }
         private StringBuilder Errors { get; set; } = new StringBuilder();
-        //public string Command { get; private set; }
         #endregion
     }
 
