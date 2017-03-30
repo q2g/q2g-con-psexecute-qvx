@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Newtonsoft.Json;
+    using System.Diagnostics;
     #endregion
 
     public class ScriptCode
@@ -23,7 +24,7 @@
             try
             {
                 var resultScript = new ScriptCode(script);
-                resultScript.Vaild();
+                resultScript.Valid();
                 return resultScript;
             }
             catch (Exception ex)
@@ -34,10 +35,12 @@
         #endregion
 
         #region Methods
-        private void Vaild()
+        private void Valid()
         {
             try
             {
+                //Ohne User und Passwort immer signiert
+
                 if (String.IsNullOrEmpty(OriginalScript))
                     throw new ArgumentException("The script is empty.");
 
@@ -79,12 +82,29 @@
                 if (String.IsNullOrEmpty(TableName))
                     TableName = ExecuteName;
 
+                if(this.IsQlikDesktopApp())
+                {
+                    return;
+                }
+
                 if (!CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
                     throw new Exception("The signature is not valid.");
             }
             catch (Exception ex)
             {
                 throw new Exception("The script could not be read.", ex);
+            }
+        }
+
+        public bool IsQlikDesktopApp()
+        {
+            try
+            {
+                return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
+            }
+            catch
+            {
+                return false;
             }
         }
         #endregion
@@ -101,5 +121,39 @@
         private string PrivateKeyPath { get; set; } = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
         private CryptoManager Manager { get; set; }
         #endregion
+    }
+
+    //source: http://stackoverflow.com/questions/394816/how-to-get-parent-process-in-net-in-managed-way
+    public static class ProcessExtensions
+    {
+        private static string FindIndexedProcessName(int pid)
+        {
+            var processName = Process.GetProcessById(pid).ProcessName;
+            var processesByName = Process.GetProcessesByName(processName);
+            string processIndexdName = null;
+
+            for (var index = 0; index < processesByName.Length; index++)
+            {
+                processIndexdName = index == 0 ? processName : processName + "#" + index;
+                var processId = new PerformanceCounter("Process", "ID Process", processIndexdName);
+                if ((int)processId.NextValue() == pid)
+                {
+                    return processIndexdName;
+                }
+            }
+
+            return processIndexdName;
+        }
+
+        private static Process FindPidFromIndexedProcessName(string indexedProcessName)
+        {
+            var parentId = new PerformanceCounter("Process", "Creating Process ID", indexedProcessName);
+            return Process.GetProcessById((int)parentId.NextValue());
+        }
+
+        public static Process Parent(this Process process)
+        {
+            return FindPidFromIndexedProcessName(FindIndexedProcessName(process.Id));
+        }
     }
 }

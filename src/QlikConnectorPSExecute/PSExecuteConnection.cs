@@ -9,10 +9,16 @@
     using QlikView.Qvx.QvxLibrary;
     using System.Management.Automation;
     using System.IO;
+    using System.Diagnostics;
+    using SimpleImpersonation;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
     {
+        #region Properties & Variables
+        private StringBuilder Errors { get; set; } = new StringBuilder();
+        #endregion 
+
         #region Init
         public override void Init() { }
         #endregion
@@ -34,11 +40,6 @@
 
             return result;
         }       
-
-        //private void LogTest(string content)
-        //{
-        //    File.WriteAllText(@"C:\Users\MBerthold\Downloads\Log.txt", content);
-        //}
 
         private DataTable GetData(ScriptCode script)
         {
@@ -93,8 +94,41 @@
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
             var script = ScriptCode.Parse(query);
-            internalData = GetData(script);
+           
+            var username = "";
+            var password = "";
+            this.MParameters.TryGetValue("userid", out username);
+            this.MParameters.TryGetValue("password", out password);
+            username = (username ?? "").Trim();
+            password = (password ?? "").Trim();
 
+            var domain = Environment.MachineName;
+            var userInfo = username.Split('\\');
+            if (userInfo.Length == 2)
+            {
+                domain = userInfo[0];
+                username = userInfo[1];
+            }
+
+            if (username == "" && password == "")
+                internalData = GetData(script);
+            else
+            {
+                try
+                {
+                    using (Impersonation.LogonUser(domain, username, password, LogonType.Network))
+                    {
+                        internalData = GetData(script);
+                    }
+
+
+                }catch(Exception ex)
+                {
+                    System.IO.File.WriteAllText(@"C:\Users\MBerthold\AppData\Local\Programs\Common Files\Qlik\Custom Data\QvRestConnector\test.txt", ex.ToString());
+                }
+            }
+
+         
             var fieldsl = new List<QvxField>();
             foreach (DataColumn column in internalData.Columns)
             {
@@ -104,7 +138,7 @@
 
             var table = new QvxTable()
             {
-                TableName = script.TableName, // TODO als Name das PSEXCUTE mit Argumenten
+                TableName = script.TableName,
                 Fields = fields,
                 GetRows = GetPowerShellResult
             };
@@ -114,11 +148,7 @@
 
             return result;
         }
-        #endregion
-
-        #region Properties & Variables
-        private StringBuilder Errors { get; set; } = new StringBuilder();
-        #endregion
+        #endregion      
     }
 
     #region Exception Classes

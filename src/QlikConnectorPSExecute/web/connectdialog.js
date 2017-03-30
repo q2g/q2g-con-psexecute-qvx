@@ -20,10 +20,7 @@
 				$scope.connectionInfo = "";
 				$scope.connectionSuccessful = false;
 				$scope.connectionString = createCustomConnectionString($scope.provider, "host=localhost;");
-
-				input.serverside.sendJsonRequest( "getInfo" ).then( function ( info ) {
-					$scope.info = info.qMessage;
-				} );
+				$scope.info = "Connector for Windows PowerShell.";
 
 				if ( $scope.isEdit ) {
 				    input.serverside.getConnection($scope.id).then(function (result) {
@@ -37,14 +34,7 @@
 
 		        if ($scope.name == "") {
 		            $scope.connectionInfo = "Please enter a name for the connection.";
-		        }
-		        else if($scope.username == "")
-		        {
-		            $scope.connectionInfo = "Please enter the user name.";
-		        }
-		        else if ($scope.password == "") {
-		            $scope.connectionInfo = "Please enter the password.";
-		        }
+		        }		       
 		        else {
 		            if ($scope.isEdit) {
 		                var overrideCredentials = $scope.username !== "" && $scope.password !== "";
@@ -60,11 +50,12 @@
                                 }
                             });
 		            } else {
-		                input.serverside.createNewConnection($scope.name, $scope.connectionString, $scope.username, $scope.password);
-		                $scope.destroyComponent();
+		                 {
+		                    input.serverside.createNewConnection($scope.name, $scope.connectionString, $scope.username, $scope.password);
+		                    $scope.destroyComponent();
+		                }
 		            }
 		        }
-		    
 			};
 
 			$scope.onTestConnectionClicked = function () {
@@ -75,7 +66,7 @@
 			};
 
 			$scope.isOkEnabled = function () {
-				return $scope.name.length > 0 && $scope.connectionSuccessful;
+				return $scope.name.length > 0;
 			};
 
 			$scope.onEscape = $scope.onCancelClicked = function () {

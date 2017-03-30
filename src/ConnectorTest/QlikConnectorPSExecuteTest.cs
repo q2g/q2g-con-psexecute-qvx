@@ -105,5 +105,12 @@
             var json = JsonConvert.DeserializeObject<Info>(result);
             Assert.AreEqual(json.qMessage, "SUCCESS");
         }
+
+        [TestCategory("PowerShellTest"), TestMethod]
+        public void TestConnection()
+        {
+            var server = new PSExecuteServer();
+            server.TestConnection("", "");
+        }
     }
 }

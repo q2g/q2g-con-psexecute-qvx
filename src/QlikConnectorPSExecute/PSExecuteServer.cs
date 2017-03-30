@@ -3,11 +3,26 @@
     #region Usings
     using System;
     using QlikView.Qvx.QvxLibrary;
+    using System.Diagnostics;
+    using System.IO;
+    using SimpleImpersonation;
+    using System.Security.Principal;
     #endregion
+
+    //Console.WriteLine("ParentPid: " + Process.GetProcessById(6972).Parent().Id); 
+    //https://www.nuget.org/packages/SimpleImpersonation 
+    //%appdata%\..\Local\Programs\Common Files\Qlik\Custom Data\
 
     public class PSExecuteServer : QvxServer
     {
         #region Methods
+        public override string CustomCaption
+        {
+            get
+            {
+                return "CustomCaption";
+            }
+        }
 
         public override QvxConnection CreateConnection()
         {
@@ -16,7 +31,7 @@
 
         public override string CreateConnectionString()
         {
-            return "Server=localhost";
+            return "";
         }
 
         public override string HandleJsonRequest(string method, string[] userParameters, QvxConnection connection)
@@ -31,18 +46,6 @@
 
             switch (method)
             {
-                case "getInfo":
-                    response = GetInfo();
-                    break;
-                case "getDatabases":
-                    response = GetDatabases(username, password);
-                    break;
-                case "getTables":
-                    response = GetTables(username, password, connection, userParameters[0], userParameters[1], userParameters[2]);
-                    break;
-                case "getFields":
-                    response = GetFields(username, password, connection, userParameters[0], userParameters[1], userParameters[2]);
-                    break;
                 case "testConnection":
                     response = TestConnection(userParameters[0], userParameters[1]);
                     break;
@@ -54,68 +57,28 @@
             return ToJson(response);
         }
 
-        private string GetMessages(Exception e)
-        {
-            var msgs = String.Empty;
-            if (e == null) return String.Empty;
-            if (msgs == "") msgs = e.Message;
-            if (e.InnerException != null)
-                msgs += $"\r\nInnerException: {GetMessages(e.InnerException)}";
-            return msgs;
-        }
-
         public bool VerifyCredentials(string username, string password)
         {
-            return (username == "" && password == "") || (username == "json" && password == "1q2w3e");
-        }
-
-        public QvDataContractResponse GetInfo()
-        {
-            return new Info
+            try
             {
-                qMessage = "Connector for Windows PowerShell."
-            };
-        }
-
-        public QvDataContractResponse GetDatabases(string username, string password)
-        {
-            if (VerifyCredentials(username, password))
-            {
-                return new QvDataContractDatabaseListResponse
+                var domain = Environment.MachineName;
+                var userInfo = username.Split('\\');
+                if (userInfo.Length == 2)
                 {
-                    qDatabases = new Database[]
-                    {
-                        new Database {qName = "PSExecute"}
-                    }
-                };
+                    domain = userInfo[0];
+                    username = userInfo[1];
+                }
+
+                if(username == "" && password == "")
+                   return true;
+                
+                Impersonation.LogonUser(domain, username, password, LogonType.Interactive);
+                return true;
             }
-
-            return new Info { qMessage = "Credentials FAIL!" };
-        }
-
-        public QvDataContractResponse GetTables(string username, string password, QvxConnection connection, string database, string owner, string command)
-        {
-            if (VerifyCredentials(username, password))
+            catch
             {
-                return new QvDataContractTableListResponse
-                {
-                    qTables = connection.MTables
-                };
+                return false;
             }
-            return new Info { qMessage = "Credentials WRONG!" };
-        }
-
-        public QvDataContractResponse GetFields(string username, string password, QvxConnection connection, string database, string owner, string table)
-        {
-            if (VerifyCredentials(username, password))
-            {
-                var currentTable = connection.FindTable(table, connection.MTables);
-                return new QvDataContractFieldListResponse
-                {
-                    qFields = (currentTable != null) ? currentTable.Fields : new QvxField[0]
-                };
-            }
-            return new Info { qMessage = "Credentials WRONG!" };
         }
 
         public QvDataContractResponse TestConnection(string username, string password)
