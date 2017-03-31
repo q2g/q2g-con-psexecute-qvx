@@ -11,6 +11,8 @@
     using System.IO;
     using System.Diagnostics;
     using SimpleImpersonation;
+    using System.Security;
+    using System.Management.Automation.Runspaces;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
@@ -41,18 +43,41 @@
             return result;
         }       
 
-        private DataTable GetData(ScriptCode script)
+        private DataTable GetData(ScriptCode script, string username = "", string password = "")
         {
             try
             {
+                //Ohne Credentials ist signierung erfoderlich
+                //Mit Credentials ist Signierung nicht erforderlich
+                //Fussnote mit Stern (Only nesseary at sign)
+
                 if (script == null)
-                    return new DataTable();
+                    return new DataTable(); 
 
                 var resultTable = new DataTable();
                 using (var powerShell = PowerShell.Create())
                 {
-                    powerShell.AddScript(script.Code);
+                    powerShell.AddScript($"Start-Job -ScriptBlock {{{script.Code}}}");
+
+                    if (username != "" && password != "")
+                    {
+                        var secPass = new SecureString();
+                        Array.ForEach(password.ToArray(), secPass.AppendChar);
+                        var psCred = new PSCredential(username, secPass);
+                        powerShell.AddParameter("Credential", psCred);
+                    }
+                    else
+                    {
+                        if (!IsQlikDesktopApp())
+                        {
+                            script.CheckSignature();
+                        }
+                    }
+
                     script.Parameters.ToList().ForEach(p => powerShell.AddParameter(p.Key, p.Value));
+
+                    powerShell.AddCommand("Wait-Job");
+                    powerShell.AddCommand("Receive-Job");
 
                     var results = powerShell.Invoke();
                     foreach (var psObject in results)
@@ -88,6 +113,18 @@
             }
         }
 
+        public bool IsQlikDesktopApp()
+        {
+            try
+            {
+                return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private DataTable internalData;
         private QvxField[] fields;
 
@@ -102,33 +139,8 @@
             username = (username ?? "").Trim();
             password = (password ?? "").Trim();
 
-            var domain = Environment.MachineName;
-            var userInfo = username.Split('\\');
-            if (userInfo.Length == 2)
-            {
-                domain = userInfo[0];
-                username = userInfo[1];
-            }
+            internalData = GetData(script, username, password);
 
-            if (username == "" && password == "")
-                internalData = GetData(script);
-            else
-            {
-                try
-                {
-                    using (Impersonation.LogonUser(domain, username, password, LogonType.Network))
-                    {
-                        internalData = GetData(script);
-                    }
-
-
-                }catch(Exception ex)
-                {
-                    System.IO.File.WriteAllText(@"C:\Users\MBerthold\AppData\Local\Programs\Common Files\Qlik\Custom Data\QvRestConnector\test.txt", ex.ToString());
-                }
-            }
-
-         
             var fieldsl = new List<QvxField>();
             foreach (DataColumn column in internalData.Columns)
             {

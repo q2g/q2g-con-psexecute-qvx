@@ -11,10 +11,11 @@
     public class ScriptCode
     {
         #region Constructor & Load
-        private ScriptCode(string script)
+        private ScriptCode(string script, bool create)
         {
             Manager = new CryptoManager(PrivateKeyPath);
             OriginalScript = script;
+            CreateSign = create;
         }
         #endregion
 
@@ -23,8 +24,22 @@
         {
             try
             {
-                var resultScript = new ScriptCode(script);
-                resultScript.Valid();
+                var resultScript = new ScriptCode(script, false);
+                resultScript.Read();
+                return resultScript;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("The script is not valid.", ex);
+            }
+        }
+
+        public static ScriptCode Create(string script)
+        {
+            try
+            {
+                var resultScript = new ScriptCode(script, true);
+                resultScript.Read();
                 return resultScript;
             }
             catch (Exception ex)
@@ -35,12 +50,10 @@
         #endregion
 
         #region Methods
-        private void Valid()
+        private void Read()
         {
             try
             {
-                //Ohne User und Passwort immer signiert
-
                 if (String.IsNullOrEmpty(OriginalScript))
                     throw new ArgumentException("The script is empty.");
 
@@ -81,14 +94,6 @@
                 TableName = Regex.Match(text, $"({ExecuteName}[^\\)]*\\))", RegexOptions.Singleline).Groups[1].Value;
                 if (String.IsNullOrEmpty(TableName))
                     TableName = ExecuteName;
-
-                if(this.IsQlikDesktopApp())
-                {
-                    return;
-                }
-
-                if (!CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
-                    throw new Exception("The signature is not valid.");
             }
             catch (Exception ex)
             {
@@ -96,17 +101,16 @@
             }
         }
 
-        public bool IsQlikDesktopApp()
+        public void CheckSignature()
         {
-            try
-            {
-                return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
-            }
-            catch
-            {
-                return false;
-            }
+            var text = OriginalScript.Replace("\r\n", "\n");
+            var signature = Regex.Match(text, $"{Algorithm}:\n([^;]*);", RegexOptions.Singleline).Groups[1].Value;
+            signature = signature.Replace("\n", "\r\n");
+
+            if (!CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
+                throw new Exception("The signature is not valid.");
         }
+
         #endregion
 
         #region Variables & Properties
@@ -120,6 +124,7 @@
         private string OriginalScript { get; set; }
         private string PrivateKeyPath { get; set; } = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
         private CryptoManager Manager { get; set; }
+        private bool CreateSign { get; set; }
         #endregion
     }
 

@@ -56,7 +56,7 @@
         {
             try
             {
-                var script = ScriptCode.Parse(tbxSign.Text);
+                var script = ScriptCode.Create(tbxSign.Text);
                 Clipboard.SetText(script.ScriptWithSign);
                 tbxSign.Text = script.ScriptWithSign;
 

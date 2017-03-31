@@ -61,18 +61,10 @@
         {
             try
             {
-                var domain = Environment.MachineName;
-                var userInfo = username.Split('\\');
-                if (userInfo.Length == 2)
-                {
-                    domain = userInfo[0];
-                    username = userInfo[1];
-                }
+                if (username == "" && password == "")
+                    return true;
 
-                if(username == "" && password == "")
-                   return true;
-                
-                Impersonation.LogonUser(domain, username, password, LogonType.Interactive);
+                Impersonation.LogonUser(Environment.MachineName, username, password, LogonType.Interactive);
                 return true;
             }
             catch

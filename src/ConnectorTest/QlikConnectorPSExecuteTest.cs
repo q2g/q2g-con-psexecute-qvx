@@ -15,7 +15,7 @@
     public class QlikConnectorPSExecuteTest
     {
         private string Command { get; } = "Get-Process | Select-Object ProcessName, Handles, ID";
-        private string SignString { get; } = "A45Wkb0gK+3CWMUyPMfNQpr6aeIAUx3PA8D3NlVd4cibWZi4Ba4SxAwrD4dzArS82tkVidbceRIN\r\n+AetQC7Xuo6Kf3a6wEMUrtqrjwe/w8Vqm4u3sPM8iFziEc2yBPA4U3SckHiDL6dv+lILBQXDJFvd\r\nF7lVOfGQeWSaDPU5hvV8RFTQtz01Nu937Q5DKRP8txSc1FxMiVXy8uMyPGSTPWohY7EBPiSqHago\r\nBiO2rNv5VqV1hnjUvXKdSfkBLr0s+jXieZcgGE8TFTkH2Ok6tH5BZNjNQd4h6sKnlkdIjyjPr0ER\r\nVNbF9kaEKrWs9PE07VSx4qD+m1mO5ECyRro+9w==";
+        private string SignString { get; } = "LxLLGoR2J6CiMcDbalMKtTgfvVmbkrtJIoLSVFZL1Mj37vUzhYeNBfo0+M1tpGn8hIEKw0wFKnwZ\r\n1h+p+HgLNA34eWw/cYSqqs4zuBh6FEIW738dWlFg4xEG3GeKoCFt5mpaKzZbQoKMYFV0JcTv0rIO\r\nXeeLpZR4UcJ4CAUTLpM6Dw3PmwIHQ05+v3txMZBSojSRpdpfJZ9Thps/5idyCG6VenXiPfU4ktQ7\r\n5HTFK8HBjL+DHKHPgcTsLXMskZVunerDBvE7kQjNCWD6bYgUEyirWOK1sNq+cHJg2j5LWWZ5QgOk\r\n/gF0g1UOl0CVPDM0phRuca4Yp3oT6VArpjcwGw==";
 
         private PSExecuteConnection TestPSExecute(string script_text)
         {
@@ -25,10 +25,15 @@
             return conn;
         }
 
+        private ScriptCode TestScript(string script_text)
+        {
+            return ScriptCode.Parse(script_text);
+        }
+
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithArguments()
         {
-            var qconn = TestPSExecute($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object Name, Id\r\nSHA256:\r\n{SignString};");
+            var script = TestScript($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object Name, Id\r\nSHA256:\r\n{SignString};");
         }
 
         [TestCategory("ScriptTest"), TestMethod]
@@ -90,24 +95,38 @@
         }
 
         [TestCategory("PowerShellTest"), TestMethod]
-        public void CheckTestConnection()
+        public void CheckTestConnectionWithCredentials()
         {
-            var script = $"PSEXECUTE()\r\n{Command}\r\nSHA256:\r\n{SignString}";
+            var script = $"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\r\nSHA256:\r\n{SignString};";
             var server = new PSExecuteServer();
             var conn = server.CreateConnection();
             conn.MParameters = new Dictionary<string, string>();
-            conn.MParameters.Add("userid", "json");
-            conn.MParameters.Add("password", "1q2w3e");
-            conn.MParameters.Add("command", script);
+            conn.MParameters.Add("userid", "test");
+            conn.MParameters.Add("password", "test1");
             conn.Init();
-
-            var result = server.HandleJsonRequest("LoadScript", new string[] { "json", "1q2w3e", script }, conn);
-            var json = JsonConvert.DeserializeObject<Info>(result);
-            Assert.AreEqual(json.qMessage, "SUCCESS");
+            conn.ExtractQuery(script, new List<QvxTable>());
         }
 
         [TestCategory("PowerShellTest"), TestMethod]
-        public void TestConnection()
+        public void CheckTestConnectionWithoutCredentials()
+        {
+            var script = $"PSEXECUTE()\r\n{Command}\r\nSHA256:\r\n{SignString};";
+            var server = new PSExecuteServer();
+            var conn = server.CreateConnection();
+            conn.MParameters = new Dictionary<string, string>();
+            conn.Init();
+            conn.ExtractQuery(script, new List<QvxTable>());
+        }
+
+        [TestCategory("TestConnection"), TestMethod]
+        public void TestConnectionWithCredentials()
+        {
+            var server = new PSExecuteServer();
+            server.TestConnection("test1", "test1");
+        }
+
+        [TestCategory("TestConnection"), TestMethod]
+        public void TestConnectionWithoutCredentials()
         {
             var server = new PSExecuteServer();
             server.TestConnection("", "");
