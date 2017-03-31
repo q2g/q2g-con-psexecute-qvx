@@ -9,8 +9,7 @@
     using QlikView.Qvx.QvxLibrary;
     using System.Management.Automation;
     using System.IO;
-    using System.Diagnostics;
-    using SimpleImpersonation;
+    using System.Diagnostics;    
     using System.Security;
     using System.Management.Automation.Runspaces;
     #endregion
@@ -18,7 +17,6 @@
     public class PSExecuteConnection : QvxConnection
     {
         #region Properties & Variables
-        private StringBuilder Errors { get; set; } = new StringBuilder();
         #endregion 
 
         #region Init
@@ -29,87 +27,120 @@
         private IEnumerable<QvxDataRow> GetPowerShellResult()
         {
             var result = new List<QvxDataRow>();
-            foreach (DataRow dataRow in internalData.Rows)
+            try
             {
-                var row = new QvxDataRow();
-                for (int i = 0; i < dataRow.ItemArray.Length; i++)
+                foreach (DataRow dataRow in internalData.Rows)
                 {
-                    row[fields[i]] = dataRow[i].ToString();
+                    var row = new QvxDataRow();
+                    for (int i = 0; i < dataRow.ItemArray.Length; i++)
+                    {
+                        row[fields[i]] = dataRow[i].ToString();
+                    }
+
+                    result.Add(row);
                 }
-                
-                result.Add(row);
+            }
+            catch 
+            {                
             }
 
             return result;
         }       
 
-        private DataTable GetData(ScriptCode script, string username = "", string password = "")
-        {
+        private DataTable GetData(ScriptCode script, string username, string password, string workdir)
+        {            
+            var actualWorkDir = Environment.CurrentDirectory;
             try
             {
-                //Ohne Credentials ist signierung erfoderlich
-                //Mit Credentials ist Signierung nicht erforderlich
-                //Fussnote mit Stern (Only nesseary at sign)
+                StringBuilder Errors = new StringBuilder();
 
-                if (script == null)
-                    return new DataTable(); 
+                if (String.IsNullOrWhiteSpace(script.Code))
+                    return new DataTable();
 
                 var resultTable = new DataTable();
                 using (var powerShell = PowerShell.Create())
                 {
-                    powerShell.AddScript($"Start-Job -ScriptBlock {{{script.Code}}}");
+
+                    Environment.CurrentDirectory = workdir;
+                    var scriptBlock = ScriptBlock.Create(script.Code);
+                    powerShell.AddCommand("Start-Job");
 
                     if (username != "" && password != "")
                     {
+                        // if username & password are defined
+                        // add than as credentials
                         var secPass = new SecureString();
                         Array.ForEach(password.ToArray(), secPass.AppendChar);
-                        var psCred = new PSCredential(username, secPass);
-                        powerShell.AddParameter("Credential", psCred);
+                        powerShell.AddParameter("Credential", new PSCredential(username, secPass));
                     }
                     else
                     {
+                        // if no username & password
+                        // check for signature if not in Sense Desktop
                         if (!IsQlikDesktopApp())
                         {
                             script.CheckSignature();
                         }
                     }
 
-                    script.Parameters.ToList().ForEach(p => powerShell.AddParameter(p.Key, p.Value));
+                    powerShell.AddParameter("ScriptBlock", scriptBlock);
+                    //foreach (var p in script.Parameters)
+                    //    powerShell.AddParameter(p.Key, p.Value);
 
+                    // Wait for the Job to finish
                     powerShell.AddCommand("Wait-Job");
+                    // Give all results and not the jobs back
                     powerShell.AddCommand("Receive-Job");
 
                     var results = powerShell.Invoke();
+
+                    foreach (var error in powerShell.Streams.Error.ReadAll())
+                    {
+                        Errors.Append($"\n{error.Exception.Message}");
+                    }
+                    if (Errors.Length > 0)
+                        throw new Exception("****"+Errors.ToString());
+
+                 
                     foreach (var psObject in results)
                     {
                         var row = resultTable.NewRow();
-                        foreach (var p in psObject.Properties)
+                        if (psObject is PSObject)
                         {
-                            if (!resultTable.Columns.Contains(p.Name))
+                            foreach (var p in psObject.Properties)
                             {
-                                resultTable.Columns.Add(p.Name);
+                                if (!resultTable.Columns.Contains(p.Name))
+                                {
+                                    resultTable.Columns.Add(p.Name);
+                                }
+                                row[p.Name] = p.Value.ToString();
                             }
-                            row[p.Name] = p.Value.ToString();
+                        }
+                        else
+                        {
+                            if (!resultTable.Columns.Contains("result"))
+                            {
+                                resultTable.Columns.Add("result");
+                            }
+                            row["result"] = psObject.ToString();
                         }
 
                         resultTable.Rows.Add(row);
                     }
 
-                    var errors = powerShell.Streams.Error.ReadAll();
-                    foreach (var error in errors)
-                    {
-                        Errors.Append($"\n{error.Exception.Message}");
-                    }
+                  
                 }
-
-                if (Errors.Length > 0)
-                    throw new Exception(Errors.ToString());
 
                 return resultTable;
             }
             catch (Exception ex)
             {
+                File.WriteAllText(@"C:\Users\MBerthold\AppData\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute\test.txt", "#########"+ex.StackTrace);
                 throw new PowerShellException("The PowerShell script can not be executed.", ex);
+            }
+            finally
+            {
+                Environment.CurrentDirectory = actualWorkDir;
             }
         }
 
@@ -134,12 +165,15 @@
            
             var username = "";
             var password = "";
+            var workdir = "";
             this.MParameters.TryGetValue("userid", out username);
             this.MParameters.TryGetValue("password", out password);
+            this.MParameters.TryGetValue("workdir", out workdir);
             username = (username ?? "").Trim();
             password = (password ?? "").Trim();
+            workdir = workdir ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-            internalData = GetData(script, username, password);
+            internalData = GetData(script, username, password, workdir);
 
             var fieldsl = new List<QvxField>();
             foreach (DataColumn column in internalData.Columns)
@@ -157,7 +191,7 @@
 
             var result = new QvxDataTable(table);
             result.Select(fields);
-
+            
             return result;
         }
         #endregion      
