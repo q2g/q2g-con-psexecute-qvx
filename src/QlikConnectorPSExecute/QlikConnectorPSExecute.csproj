@@ -135,6 +135,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="web\tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -150,6 +151,9 @@
       <DependentUpon>connectdialog.less</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <TypeScriptCompile Include="web\connectdialog.ts">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </TypeScriptCompile>
     <Content Include="web\connectdialog.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -166,6 +170,7 @@
     <Content Include="web\selectdialog.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <TypeScriptCompile Include="web\helper.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

@@ -10,10 +10,28 @@
 
     public class ScriptCode
     {
+        public bool IsQlikDesktopApp
+        {
+            get
+            {
+                try
+                {
+                    return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
         #region Constructor & Load
         private ScriptCode(string script, bool create)
         {
-            Manager = new CryptoManager(PrivateKeyPath);
+            if (!IsQlikDesktopApp)
+            {
+                Manager = new CryptoManager(PrivateKeyPath);
+            }
             OriginalScript = script;
             CreateSign = create;
         }
@@ -65,7 +83,7 @@
                 if (Code.IndexOf(Algorithm) > -1)
                     Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
 
-                var signature = Manager.SignWithPrivateKey(Code, false, true, Algorithm);
+                var signature = Manager?.SignWithPrivateKey(Code, false, true, Algorithm);
                 var fullSignature = $"{Algorithm}:\r\n{signature}";
 
                 if (Code.IndexOf(Algorithm) > -1)
@@ -107,7 +125,7 @@
             var signature = Regex.Match(text, $"{Algorithm}:\n([^;]*);", RegexOptions.Singleline).Groups[1].Value;
             signature = signature.Replace("\n", "\r\n");
 
-            if (!CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
+            if (!IsQlikDesktopApp &&  !CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
                 throw new Exception("The signature is not valid.");
         }
 

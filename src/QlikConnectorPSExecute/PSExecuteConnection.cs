@@ -9,7 +9,7 @@
     using QlikView.Qvx.QvxLibrary;
     using System.Management.Automation;
     using System.IO;
-    using System.Diagnostics;    
+    using System.Diagnostics;
     using System.Security;
     using System.Management.Automation.Runspaces;
     #endregion
@@ -17,7 +17,7 @@
     public class PSExecuteConnection : QvxConnection
     {
         #region Properties & Variables
-        #endregion 
+        #endregion
 
         #region Init
         public override void Init() { }
@@ -40,15 +40,15 @@
                     result.Add(row);
                 }
             }
-            catch 
-            {                
+            catch
+            {
             }
 
             return result;
-        }       
+        }
 
         private DataTable GetData(ScriptCode script, string username, string password, string workdir)
-        {            
+        {
             var actualWorkDir = Environment.CurrentDirectory;
             try
             {
@@ -67,25 +67,20 @@
 
                     if (username != "" && password != "")
                     {
-                        // if username & password are defined
-                        // add than as credentials
+                        // if username & password are defined -> add as credentials
                         var secPass = new SecureString();
                         Array.ForEach(password.ToArray(), secPass.AppendChar);
                         powerShell.AddParameter("Credential", new PSCredential(username, secPass));
                     }
                     else
                     {
-                        // if no username & password
-                        // check for signature if not in Sense Desktop
-                        if (!IsQlikDesktopApp())
-                        {
-                            script.CheckSignature();
-                        }
+                        // without check signature
+                        script.CheckSignature();
                     }
 
                     powerShell.AddParameter("ScriptBlock", scriptBlock);
-                    //foreach (var p in script.Parameters)
-                    //    powerShell.AddParameter(p.Key, p.Value);
+                    foreach (var p in script.Parameters)
+                        powerShell.AddParameter(p.Key, p.Value);
 
                     // Wait for the Job to finish
                     powerShell.AddCommand("Wait-Job");
@@ -101,58 +96,33 @@
                     if (Errors.Length > 0)
                         throw new Exception("****"+Errors.ToString());
 
-                 
                     foreach (var psObject in results)
                     {
                         var row = resultTable.NewRow();
-                        if (psObject is PSObject)
+                        foreach (var p in psObject.Properties)
                         {
-                            foreach (var p in psObject.Properties)
+                            if (p.Name != "PSComputerName" && p.Name != "RunspaceId" && p.Name != "PSShowComputerName")
                             {
                                 if (!resultTable.Columns.Contains(p.Name))
                                 {
                                     resultTable.Columns.Add(p.Name);
                                 }
-                                row[p.Name] = p.Value.ToString();
+                                row[p.Name] = (p.Value ?? "").ToString();
                             }
                         }
-                        else
-                        {
-                            if (!resultTable.Columns.Contains("result"))
-                            {
-                                resultTable.Columns.Add("result");
-                            }
-                            row["result"] = psObject.ToString();
-                        }
-
                         resultTable.Rows.Add(row);
                     }
-
-                  
                 }
 
                 return resultTable;
             }
             catch (Exception ex)
             {
-                File.WriteAllText(@"C:\Users\MBerthold\AppData\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute\test.txt", "#########"+ex.StackTrace);
                 throw new PowerShellException("The PowerShell script can not be executed.", ex);
             }
             finally
             {
                 Environment.CurrentDirectory = actualWorkDir;
-            }
-        }
-
-        public bool IsQlikDesktopApp()
-        {
-            try
-            {
-                return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
-            }
-            catch
-            {
-                return false;
             }
         }
 
@@ -162,7 +132,7 @@
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
             var script = ScriptCode.Parse(query);
-           
+
             var username = "";
             var password = "";
             var workdir = "";
@@ -191,10 +161,10 @@
 
             var result = new QvxDataTable(table);
             result.Select(fields);
-            
+
             return result;
         }
-        #endregion      
+        #endregion
     }
 
     #region Exception Classes

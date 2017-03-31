@@ -149,7 +149,10 @@
             using (var powerShell = PowerShell.Create())
             {
                 Environment.CurrentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-                var scriptBlock = ScriptBlock.Create("$env:username | Out-String");
+                var scriptBlock = ScriptBlock.Create(
+                    //"New-Object PSObject -Property @{ UserName = $env:username; } | Select-Object UserName"
+                    "Get-Process | Select-Object Id"
+                    );
 
                 powerShell.AddCommand("Start-Job");
                 powerShell.AddParameter("ScriptBlock", scriptBlock);

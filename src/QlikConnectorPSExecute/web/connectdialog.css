@@ -10,6 +10,7 @@
 .qveventlogconnectdialog {
   position: relative;
   top: 150px;
+  height: 350px;
 }
 .qveventlogconnectdialog .connectionInfo {
   padding-top: 10px;
@@ -18,16 +19,3 @@
 .qveventlogconnectdialog .connectionInfo.success {
   color: green;
 }
-/*.qveventlogconnectdialog .footer {
-    text-align: right;
-    padding-top: 15px;
-}
-
-.qveventlogconnectdialog .footer button {
-    display: inline-block;
-    padding: 5px 10px;
-}
-
-.qveventlogconnectdialog .footer button[disabled=disabled] {
-    color: lightgrey;
-}*/
