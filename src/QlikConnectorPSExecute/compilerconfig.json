@@ -1,6 +1,9 @@
 ﻿[
   {
     "outputFile": "web/connectdialog.css",
-    "inputFile": "web/connectdialog.less"
+    "inputFile": "web/connectdialog.less",
+    "minify": {
+      "enabled": false
+    }
   }
 ]

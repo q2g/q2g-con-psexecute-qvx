@@ -1,0 +1,7 @@
+{
+  "name": "myproject",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/qlik-visualizationextensions": "^3.2.3"
+  }
+}
