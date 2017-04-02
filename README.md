@@ -22,8 +22,8 @@ or
 ## Usage
 For the usage just have a look to the further documentation.
 
-PS Examples
-Working with Signatures
+1. [PS Examples](docs/PS_Examples.md)
+2. [Working with Signatures](docs/Signature.md)
 
 ## Bugs & Co.
 
