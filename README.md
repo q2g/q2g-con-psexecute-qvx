@@ -15,7 +15,7 @@ or
 
 ### source
 
-1. Clone the Github Repor
+1. Clone the Github Repo
 2. Open the .sln in Visual Studio
 3. Compile
 
