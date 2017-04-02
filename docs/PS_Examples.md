@@ -1,3 +1,8 @@
+# Examples
+
+Even if this just runs simple powershell script commands, we try to show a list usables code snippets.
+The connector tries to fetch the result out of the pipe as table and deliver that back to qlik as datasource.
+
 
 ```
 LIB CONNECT TO 'test';
