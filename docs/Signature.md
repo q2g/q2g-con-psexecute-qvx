@@ -9,7 +9,7 @@ If you don't like to to this with commond commandline tools you can just
 start the QlikConnectorPSExecute.exe on the server. This will open the
 following screen and will automatically sign your script code.
 
-!(signature)[images/PS_Example1_Result.png]
+![signature](images/PS_CreateSignature.png)
 
 You can now copy that into your script and everybody can execute that
 signed script, so please be aware what your are sign.
