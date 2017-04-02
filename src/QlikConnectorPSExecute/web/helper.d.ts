@@ -6,3 +6,7 @@
 interface IQVAngular {
     promise: any;
 }
+
+declare module "qvangular" {
+    var e: IQVAngular; export = e;
+}
