@@ -7,4 +7,4 @@ Get-ChildItem -Force C:\ | Select-Object Name, CreationTime;
 ```
 Result
 
-![dirlist](images/PS_Example1_Result.PNG.png)
+![dirlist](images/PS_Example1_Result.PNG)
