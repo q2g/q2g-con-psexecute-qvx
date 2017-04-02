@@ -147,29 +147,30 @@
     <Content Include="lib\BouncyCastle.Crypto.dll" />
     <Content Include="lib\QvxLibrary.dll" />
     <Content Include="lib\verpatch.exe" />
-    <None Include="tsconfig.json" />
-    <None Include="web\connectdialog.less">
+    <Content Include="web\connector-main.js">
+      <DependentUpon>connector-main.ts</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="web\selectdialog.js">
+      <DependentUpon>selectdialog.ts</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="tsconfig.json" />
+    <None Include="web\connectdialog.less" />
     <Content Include="web\connectdialog.css">
       <DependentUpon>connectdialog.less</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <TypeScriptCompile Include="web\connectdialog.ts">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="web\connectdialog.ts" />
     <Content Include="web\connectdialog.js">
       <DependentUpon>connectdialog.ts</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="web\connectdialog.ng.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <TypeScriptCompile Include="web\connector-main.ts">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="web\selectdialog.ts">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="web\connector-main.ts" />
+    <TypeScriptCompile Include="web\selectdialog.ts" />
     <TypeScriptCompile Include="web\helper.d.ts" />
   </ItemGroup>
   <ItemGroup>
@@ -202,12 +203,37 @@ xcopy "$(TargetDir)*.*" "%25appdata%25\..\Local\Programs\Common Files\Qlik\Custo
   </Target>
   <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
   <Import Project="..\packages\BuildWebCompiler.1.11.328\build\BuildWebCompiler.targets" Condition="Exists('..\packages\BuildWebCompiler.1.11.328\build\BuildWebCompiler.targets')" />
-  <Import Project="..\packages\Microsoft.TypeScript.MSBuild.2.2.2\build\Microsoft.TypeScript.MSBuild.targets" Condition="Exists('..\packages\Microsoft.TypeScript.MSBuild.2.2.2\build\Microsoft.TypeScript.MSBuild.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
+
   -->
+  <Target Name="ZipPacked">
+    <Message Importance="High" Text="Version: $(GitVersion_FullSemVer)" />
+    <Message Importance="High" Text="OutputPath: $(OutputPath)" />
+    <CreateItem Include="$(OutputPath)\**\*.*">
+      <Output ItemName="ZipFiles" TaskParameter="Include" />
+    </CreateItem>
+    <Zip ZipFileName="bin\$(AssemblyName).zip" WorkingDirectory="$(OutputPath)\" Files="@(ZipFiles)" />
+  </Target>
+  <Target Name="AfterBuild">
+    <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
+  </Target>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
+  </PropertyGroup>
+  <Import Project="..\packages\Microsoft.TypeScript.MSBuild.2.2.2\build\Microsoft.TypeScript.MSBuild.targets" Condition="Exists('..\packages\Microsoft.TypeScript.MSBuild.2.2.2\build\Microsoft.TypeScript.MSBuild.targets')" />
 </Project>
