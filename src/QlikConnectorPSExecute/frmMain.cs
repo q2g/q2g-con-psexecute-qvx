@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Drawing;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -56,7 +57,15 @@
         {
             try
             {
-                var script = ScriptCode.Create(tbxSign.Text);
+                var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+                if(!File.Exists(keyFile))
+                {
+                    ShowStatus("The certificate file does not exist.");
+                    return;
+                }
+
+                var manager = new CryptoManager(keyFile);
+                var script = ScriptCode.Create(tbxSign.Text, manager);
                 Clipboard.SetText(script.ScriptWithSign);
                 tbxSign.Text = script.ScriptWithSign;
 

@@ -6,59 +6,52 @@
     using System.Text.RegularExpressions;
     using Newtonsoft.Json;
     using System.Diagnostics;
+    using NLog;
     #endregion
 
     public class ScriptCode
     {
-        public bool IsQlikDesktopApp
-        {
-            get
-            {
-                try
-                {
-                    return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
+        #region Logger
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+        #endregion
 
         #region Constructor & Load
-        private ScriptCode(string script, bool create)
+        private ScriptCode(string script)
         {
-            if (!IsQlikDesktopApp)
-            {
-                Manager = new CryptoManager(PrivateKeyPath);
-            }
             OriginalScript = script;
-            CreateSign = create;
         }
         #endregion
 
         #region Static Methods
+        public static ScriptCode Create(string script, CryptoManager manager)
+        {
+            try
+            {
+                var resultScript = new ScriptCode(script);
+                if (resultScript.Read(manager))
+                {
+                    return resultScript;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("The script could not be created.", ex);
+            }
+        }
+
         public static ScriptCode Parse(string script)
         {
             try
             {
-                var resultScript = new ScriptCode(script, false);
-                resultScript.Read();
-                return resultScript;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("The script is not valid.", ex);
-            }
-        }
+                var resultScript = new ScriptCode(script);
+                if(resultScript.Read(null))
+                {
+                    return resultScript;
+                }
 
-        public static ScriptCode Create(string script)
-        {
-            try
-            {
-                var resultScript = new ScriptCode(script, true);
-                resultScript.Read();
-                return resultScript;
+                return null;
             }
             catch (Exception ex)
             {
@@ -68,41 +61,29 @@
         #endregion
 
         #region Methods
-        private void Read()
+        private bool Read(CryptoManager manager)
         {
             try
             {
                 if (String.IsNullOrEmpty(OriginalScript))
-                    throw new ArgumentException("The script is empty.");
+                {
+                    logger.Warn("The script is empty.");
+                    return false;
+                }
 
                 if (!OriginalScript.Trim().StartsWith(ExecuteName))
-                    throw new ArgumentException($"The command {ExecuteName} was not found.");
+                {
+                    logger.Warn($"The command {ExecuteName} was not found.");
+                    return false;
+                }
 
                 var text = OriginalScript.Trim().Replace("\r\n", "\n");
                 Code = Regex.Replace(text, $"{ExecuteName}[^\n]*\n", "", RegexOptions.Singleline).Trim();
                 if (Code.IndexOf(Algorithm) > -1)
                     Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
 
-                var signature = Manager?.SignWithPrivateKey(Code, false, true, Algorithm);
-                var fullSignature = $"{Algorithm}:\r\n{signature}";
-
-                if (Code.IndexOf(Algorithm) > -1)
-                    Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
-
-                var originalWithoutSign = OriginalScript.Replace("\r\n", "\n");
-                var sbreak = String.Empty;
-                if (originalWithoutSign.IndexOf(Algorithm) > -1)
-                {
-                    originalWithoutSign = originalWithoutSign.Substring(0, originalWithoutSign.IndexOf(Algorithm));
-                    if (originalWithoutSign.EndsWith("\n"))
-                        ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}{fullSignature}";
-                    else
-                        ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}\r\n{fullSignature}";
-                }
-                else
-                {
-                    ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}\r\n{fullSignature}";
-                }
+                if (manager != null)
+                    CreateSignature(manager, OriginalScript);
 
                 var args = Regex.Match(OriginalScript, $"{ExecuteName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
                 Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(args);
@@ -112,23 +93,54 @@
                 TableName = Regex.Match(text, $"({ExecuteName}[^\\)]*\\))", RegexOptions.Singleline).Groups[1].Value;
                 if (String.IsNullOrEmpty(TableName))
                     TableName = ExecuteName;
+
+                return true;
             }
             catch (Exception ex)
             {
-                throw new Exception("The script could not be read.", ex);
+                logger.Error(ex, "The script could not be read.");
+                return false;
             }
         }
 
-        public void CheckSignature()
+        private void CreateSignature(CryptoManager manager, string script)
         {
-            var text = OriginalScript.Replace("\r\n", "\n");
-            var signature = Regex.Match(text, $"{Algorithm}:\n([^;]*);", RegexOptions.Singleline).Groups[1].Value;
-            signature = signature.Replace("\n", "\r\n");
+            var signature = manager.SignWithPrivateKey(Code, false, true, Algorithm);
+            var fullSignature = $"{Algorithm}:\r\n{signature}";
 
-            if (!IsQlikDesktopApp &&  !CryptoManager.IsValidPublicKey(Code, signature, Manager.PublicKey))
-                throw new Exception("The signature is not valid.");
+            if (Code.IndexOf(Algorithm) > -1)
+                Code = Code.Substring(0, Code.IndexOf(Algorithm)).Trim();
+
+            var originalWithoutSign = script.Replace("\r\n", "\n");
+            var sbreak = String.Empty;
+            if (originalWithoutSign.IndexOf(Algorithm) > -1)
+            {
+                originalWithoutSign = originalWithoutSign.Substring(0, originalWithoutSign.IndexOf(Algorithm));
+                if (originalWithoutSign.EndsWith("\n"))
+                    ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}{fullSignature}";
+                else
+                    ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}\r\n{fullSignature}";
+            }
+            else
+            {
+                ScriptWithSign = $"{originalWithoutSign.Replace("\n", "\r\n")}\r\n{fullSignature}";
+            }
         }
 
+        public string GetSignature()
+        {
+            try
+            {
+                var text = OriginalScript.Replace("\r\n", "\n");
+                var signature = Regex.Match(text, $"{Algorithm}:\n([^;]*);", RegexOptions.Singleline).Groups[1].Value;
+                return signature.Replace("\n", "\r\n");
+            }
+            catch(Exception ex)
+            {
+                logger.Error(ex, "The signature could not be read.");
+                return null;
+            }
+        }
         #endregion
 
         #region Variables & Properties
@@ -137,12 +149,9 @@
         public string ScriptWithSign { get; private set; }
         public string TableName { get; private set; }
 
+        private string OriginalScript { get; set; }
         private string ExecuteName { get; set; } = "PSEXECUTE";
         private string Algorithm { get; set; } = "SHA256";
-        private string OriginalScript { get; set; }
-        private string PrivateKeyPath { get; set; } = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-        private CryptoManager Manager { get; set; }
-        private bool CreateSign { get; set; }
         #endregion
     }
 

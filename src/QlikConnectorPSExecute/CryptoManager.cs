@@ -65,13 +65,13 @@
             }
         }
 
-        public static bool IsValidPublicKey(string data, string sign, RsaKeyParameters public_key, string algorithm = "SHA256withRSA")
+        public bool IsValidPublicKey(string data, string sign, string algorithm = "SHA256withRSA")
         {
             try
             {
                 var sig = Convert.FromBase64String(sign);
                 ISigner signer = SignerUtilities.GetSigner(algorithm);
-                signer.Init(false, public_key);
+                signer.Init(false, PublicKey);
 
                 var msgBytes = Encoding.Default.GetBytes(data);
                 signer.BlockUpdate(msgBytes, 0, msgBytes.Length);

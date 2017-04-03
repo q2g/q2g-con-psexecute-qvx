@@ -12,15 +12,28 @@
     using System.Diagnostics;
     using System.Security;
     using System.Management.Automation.Runspaces;
+    using NLog;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
     {
+        #region Logger
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+        #endregion
+
         #region Properties & Variables
+        private CryptoManager Manager { get; set; }
         #endregion
 
         #region Init
-        public override void Init() { }
+        public override void Init()
+        {
+            var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+            if (File.Exists(keyFile))
+            {
+                Manager = new CryptoManager(keyFile);
+            }
+        }
         #endregion
 
         #region Methods
@@ -52,7 +65,7 @@
             var actualWorkDir = Environment.CurrentDirectory;
             try
             {
-                StringBuilder Errors = new StringBuilder();
+                var Errors = new StringBuilder();
 
                 if (String.IsNullOrWhiteSpace(script.Code))
                     return new DataTable();
@@ -60,7 +73,6 @@
                 var resultTable = new DataTable();
                 using (var powerShell = PowerShell.Create())
                 {
-
                     Environment.CurrentDirectory = workdir;
                     var scriptBlock = ScriptBlock.Create(script.Code);
                     powerShell.AddCommand("Start-Job");
@@ -75,7 +87,15 @@
                     else
                     {
                         // without check signature
-                        script.CheckSignature();
+                        var signature = script.GetSignature();
+                        if (Manager == null)
+                            return new DataTable();
+
+                        if(!Manager.IsValidPublicKey(script.Code, signature))
+                        {
+                            logger.Warn("The signature could not be valid.");
+                            return new DataTable();
+                        }
                     }
 
                     powerShell.AddParameter("ScriptBlock", scriptBlock);
@@ -88,13 +108,15 @@
                     powerShell.AddCommand("Receive-Job");
 
                     var results = powerShell.Invoke();
-
                     foreach (var error in powerShell.Streams.Error.ReadAll())
                     {
                         Errors.Append($"\n{error.Exception.Message}");
                     }
                     if (Errors.Length > 0)
-                        throw new Exception("****"+Errors.ToString());
+                    {
+                        logger.Warn($"Powershell-Error: {Errors.ToString()}");
+                        return new DataTable();
+                    }
 
                     foreach (var psObject in results)
                     {
@@ -123,6 +145,21 @@
             finally
             {
                 Environment.CurrentDirectory = actualWorkDir;
+            }
+        }
+
+        private bool IsQlikDesktopApp
+        {
+            get
+            {
+                try
+                {
+                    return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
+                }
+                catch
+                {
+                    return false;
+                }
             }
         }
 

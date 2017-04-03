@@ -81,6 +81,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Frameworks\JSON\Json.601\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.5\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="QvxLibrary, Version=2.1.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\QvxLibrary.dll</HintPath>
@@ -188,7 +192,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>"$(ProjectDir)lib\verpatch.exe" "$(TargetPath)" /s "QlikView Connector" "PS Execute Connector"
-xcopy "$(TargetDir)*.*" "%25appdata%25\..\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute" /s /e /y /i /r /q</PostBuildEvent>
+
+xcopy "$(TargetDir)*.*" "%25appdata%25\..\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute" /s /e /y /i /r /q
+xcopy "$(TargetDir)*.*" "C:\Program Files\Common Files\Qlik\Custom Data\QlikConnectorPSExecute" /s /e /y /i /r /q</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -220,7 +226,7 @@ xcopy "$(TargetDir)*.*" "%25appdata%25\..\Local\Programs\Common Files\Qlik\Custo
   <Target Name="AfterBuild">
     <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
   </Target>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+  <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>

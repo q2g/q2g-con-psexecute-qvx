@@ -29,83 +29,90 @@
             return conn;
         }
 
-        private ScriptCode TestScript(string script_text)
+        private CryptoManager CreateManager()
+        {
+            var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+            return new CryptoManager(keyFile);
+        }
+
+        private ScriptCode CreateScript(string script_text, CryptoManager manager)
         {
             return ScriptCode.Parse(script_text);
+        }
+
+        private bool TestScript(string script_text)
+        {
+            var manager = CreateManager();
+            var script = CreateScript(script_text, manager);
+            var signature = script.GetSignature();
+            return manager.IsValidPublicKey(script.Code, signature);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithArguments()
         {
-            var script = TestScript($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\r\nSHA256:\r\n{SignString};");
-            script.CheckSignature();
+            var result = TestScript($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\r\nSHA256:\r\n{SignString};");
+            Assert.AreEqual(result, true);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithBreaksAndTabs()
         {
-            var script = TestScript($"PSEXECUTE()\r\n\t\t{Command}\r\n\t\tSHA256:\r\n{SignString};");
-            script.CheckSignature();
+            var result = TestScript($"PSEXECUTE()\r\n\t\t{Command}\r\n\t\tSHA256:\r\n{SignString};");
+            Assert.AreEqual(result, true);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithUnixBreaks()
         {
-            var script = TestScript($" PSEXECUTE()\n  {Command}\n SHA256:\n{SignString};");
-            script.CheckSignature();
+            var result = TestScript($" PSEXECUTE()\n  {Command}\n SHA256:\n{SignString};");
+            Assert.AreEqual(result, true);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithNoArguments()
         {
-            var script = TestScript($" PSEXECUTE()\r\n  {Command}\r\n\r\n SHA256:\r\n{SignString};");
-            script.CheckSignature();
+            var result = TestScript($" PSEXECUTE()\r\n  {Command}\r\n\r\n SHA256:\r\n{SignString};");
+            Assert.AreEqual(result, true);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithPreTabs()
         {
-            var script = TestScript($"\r\n\t\t PSEXECUTE()\r\n  {Command}\r\n\r\n SHA256:\r\n{SignString};");
-            script.CheckSignature();
+            var result = TestScript($"\r\n\t\t PSEXECUTE()\r\n  {Command}\r\n\r\n SHA256:\r\n{SignString};");
+            Assert.AreEqual(result, true);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithMoreBreaksAndArguments()
         {
-            var script = TestScript($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\n\r\n SHA256:\r\n{SignString};\r\n \r\n \r\n \r\n \r\n ");
-            script.CheckSignature();
+            var result = TestScript($" \r\n\r\n\r\n\r\n\r\nPSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\n\r\n SHA256:\r\n{SignString};\r\n \r\n \r\n \r\n \r\n ");
+            Assert.AreEqual(result, true);
         }
 
-        [TestCategory("ScriptTest"), TestMethod, ExpectedException(typeof(Exception))]
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithWrongSign()
         {
-            var script = TestScript($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object ProcessName, Handles\r\nSHA256:\r\n{SignString};");
-            script.CheckSignature();
+            var result = TestScript($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object ProcessName, Handles\r\nSHA256:\r\n{SignString};");
+            Assert.AreEqual(result, false);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithoutSign()
         {
-            try
-            {
-                var script = TestScript($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object ProcessName, Handles");
-                script.CheckSignature();
-                Assert.Fail();
-            }
-            catch(Exception ex)
-            {
-                Assert.AreEqual("The signature is not valid.", ex.Message);
-            }
+            var result = TestScript($"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\nGet-Process | Select-Object ProcessName, Handles");
+            Assert.AreEqual(result, false);
         }
 
-        [TestCategory("ScriptTest"), TestMethod, ExpectedException(typeof(Exception))]
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWrongCommand()
         {
-            var script = TestScript($" PSEXCEUTE()\r\n  Get-Pocss | Select-Object ProcessName, Handles\r\n  \r\n  \r\n SHA256:\r\n{SignString};");
-            script.CheckSignature();
+            var manager = CreateManager();
+            var script = CreateScript($" PSEXCEUTE()\r\n  Get-Pocss | Select-Object ProcessName, Handles\r\n  \r\n  \r\n SHA256:\r\n{SignString};", manager);
+            Assert.AreEqual(script, null);
         }
 
-        [TestCategory("PowerShellTest"), TestMethod, ExpectedException(typeof(PowerShellException))]
+        [TestCategory("PowerShellTest"), TestMethod]
         public void ScriptWithUnknownArguments()
         {
             var script = $" \r\n\r\n\r\n\r\n\r\nPSEXECUTE\r\n{Command}\n\r\nmehre unbekannte befehle,.-..\r\nSHA256:\r\n{SignStringWrong};\r\n \r\n \r\n \r\n \r\n ";
@@ -123,7 +130,7 @@
             var server = new PSExecuteServer();
             var conn = server.CreateConnection();
             conn.MParameters = new Dictionary<string, string>();
-            conn.MParameters.Add("userid", "test");
+            conn.MParameters.Add("userid", "test1");
             conn.MParameters.Add("password", "test1");
             conn.Init();
             conn.ExtractQuery(script, new List<QvxTable>());
