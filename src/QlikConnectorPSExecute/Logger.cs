@@ -22,7 +22,7 @@ namespace QlikConnectorPSExecute
 
         public void Error(Exception ex, string message)
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder(ex.Message);
             Exception currentEx = ex;
             while (currentEx.InnerException != null)
             {

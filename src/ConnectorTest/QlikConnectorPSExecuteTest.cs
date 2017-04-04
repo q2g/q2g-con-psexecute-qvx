@@ -139,7 +139,7 @@
         [TestCategory("PowerShellTest"), TestMethod]
         public void CheckTestConnectionWithoutCredentials()
         {
-            var script = $"PSEXECUTE()\r\n{Command}\r\nSHA256:\r\n{SignString};";
+            var script = $"PSEXECUTE({{arg1:\"Hallo\", arg2:\"test\"}})\r\n{Command}\r\nSHA256:\r\n{SignString};";
             var server = new PSExecuteServer();
             var conn = server.CreateConnection();
             conn.MParameters = new Dictionary<string, string>();
@@ -173,5 +173,17 @@
             }
         }
 
+        [TestCategory("Test"), TestMethod]
+        public void ArgumentTest()
+        {
+            var script = $"PSEXECUTE({{arg1: \"WUDFHost\"}}) Get - Process $arg1 | Select - Object Name, Id";
+            var server = new PSExecuteServer();
+            var conn = server.CreateConnection();
+            conn.MParameters = new Dictionary<string, string>();
+            conn.MParameters.Add("userid", "test1");
+            conn.MParameters.Add("password", "test1");
+            conn.Init();
+            conn.ExtractQuery(script, new List<QvxTable>());
+        }
     }
 }

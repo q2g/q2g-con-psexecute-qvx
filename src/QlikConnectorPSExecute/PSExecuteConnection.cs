@@ -30,9 +30,7 @@
             {
                 var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
                 if (File.Exists(keyFile))
-                {
                     Manager = new CryptoManager(keyFile);
-                }
             }
             catch (Exception ex)
             {
@@ -97,14 +95,15 @@
 
                         if(!Manager.IsValidPublicKey(script.Code, signature))
                         {
-                            //logger.Warn("The signature could not be valid.");
+                            logger.Warn("The signature could not be valid.");
                             return resultTable;
                         }
                     }
 
                     powerShell.AddParameter("ScriptBlock", scriptBlock);
+                    //powerShell.AddParameters(script.Parameters);
                     foreach (var p in script.Parameters)
-                        powerShell.AddParameter(p.Key, p.Value);
+                      powerShell.Runspace.SessionStateProxy.PSVariable.Set(p.Key, p.Value);
 
                     // Wait for the Job to finish
                     powerShell.AddCommand("Wait-Job");
@@ -135,6 +134,7 @@
                                 row[p.Name] = (p.Value ?? "").ToString();
                             }
                         }
+
                         resultTable.Rows.Add(row);
                     }
                 }
