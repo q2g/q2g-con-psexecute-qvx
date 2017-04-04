@@ -11,14 +11,12 @@
     using System.IO;
     using System.Diagnostics;
     using System.Security;
-    using System.Management.Automation.Runspaces;
-    using NLog;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
     {
         #region Logger
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Logger.CreateLogger();
         #endregion
 
         #region Properties & Variables
@@ -28,10 +26,17 @@
         #region Init
         public override void Init()
         {
-            var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-            if (File.Exists(keyFile))
+            try
             {
-                Manager = new CryptoManager(keyFile);
+                var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
+                if (File.Exists(keyFile))
+                {
+                    Manager = new CryptoManager(keyFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "The connection could not be initialized.");
             }
         }
         #endregion
@@ -53,9 +58,7 @@
                     result.Add(row);
                 }
             }
-            catch
-            {
-            }
+            catch { }
 
             return result;
         }
@@ -63,14 +66,15 @@
         private DataTable GetData(ScriptCode script, string username, string password, string workdir)
         {
             var actualWorkDir = Environment.CurrentDirectory;
+            var resultTable = new DataTable();
+
             try
             {
                 var Errors = new StringBuilder();
 
                 if (String.IsNullOrWhiteSpace(script.Code))
-                    return new DataTable();
+                    return resultTable;
 
-                var resultTable = new DataTable();
                 using (var powerShell = PowerShell.Create())
                 {
                     Environment.CurrentDirectory = workdir;
@@ -89,12 +93,12 @@
                         // without check signature
                         var signature = script.GetSignature();
                         if (Manager == null)
-                            return new DataTable();
+                            return resultTable;
 
                         if(!Manager.IsValidPublicKey(script.Code, signature))
                         {
-                            logger.Warn("The signature could not be valid.");
-                            return new DataTable();
+                            //logger.Warn("The signature could not be valid.");
+                            return resultTable;
                         }
                     }
 
@@ -114,8 +118,7 @@
                     }
                     if (Errors.Length > 0)
                     {
-                        logger.Warn($"Powershell-Error: {Errors.ToString()}");
-                        return new DataTable();
+                        throw new Exception($"Powershell-Error: {Errors.ToString()}");
                     }
 
                     foreach (var psObject in results)
@@ -135,17 +138,18 @@
                         resultTable.Rows.Add(row);
                     }
                 }
-
-                return resultTable;
             }
             catch (Exception ex)
             {
-                throw new PowerShellException("The PowerShell script can not be executed.", ex);
+                logger.Error(ex, "The PowerShell script can not be executed.");
+                resultTable = new DataTable();
             }
             finally
             {
                 Environment.CurrentDirectory = actualWorkDir;
             }
+
+            return resultTable;
         }
 
         private bool IsQlikDesktopApp
@@ -168,46 +172,47 @@
 
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
-            var script = ScriptCode.Parse(query);
-
-            var username = "";
-            var password = "";
-            var workdir = "";
-            this.MParameters.TryGetValue("userid", out username);
-            this.MParameters.TryGetValue("password", out password);
-            this.MParameters.TryGetValue("workdir", out workdir);
-            username = (username ?? "").Trim();
-            password = (password ?? "").Trim();
-            workdir = workdir ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-            internalData = GetData(script, username, password, workdir);
-
-            var fieldsl = new List<QvxField>();
-            foreach (DataColumn column in internalData.Columns)
+            try
             {
-                fieldsl.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
+                var script = ScriptCode.Parse(query);
+
+                var username = "";
+                var password = "";
+                var workdir = "";
+                this.MParameters.TryGetValue("userid", out username);
+                this.MParameters.TryGetValue("password", out password);
+                this.MParameters.TryGetValue("workdir", out workdir);
+                username = (username ?? "").Trim();
+                password = (password ?? "").Trim();
+                workdir = workdir ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+                internalData = GetData(script, username, password, workdir);
+
+                var fieldsl = new List<QvxField>();
+                foreach (DataColumn column in internalData.Columns)
+                {
+                    fieldsl.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
+                }
+                fields = fieldsl.ToArray();
+
+                var table = new QvxTable()
+                {
+                    TableName = script.TableName,
+                    Fields = fields,
+                    GetRows = GetPowerShellResult
+                };
+
+                var result = new QvxDataTable(table);
+                result.Select(fields);
+
+                return result;
             }
-            fields = fieldsl.ToArray();
-
-            var table = new QvxTable()
+            catch (Exception ex)
             {
-                TableName = script.TableName,
-                Fields = fields,
-                GetRows = GetPowerShellResult
-            };
-
-            var result = new QvxDataTable(table);
-            result.Select(fields);
-
-            return result;
+                logger.Error(ex, "The query could not be executed.");
+                return new QvxDataTable(new QvxTable() { TableName = "Error" });
+            }
         }
         #endregion
     }
-
-    #region Exception Classes
-    public class PowerShellException : Exception
-    {
-        public PowerShellException(string message, Exception ex) : base(message, ex) { }
-    }
-    #endregion
 }

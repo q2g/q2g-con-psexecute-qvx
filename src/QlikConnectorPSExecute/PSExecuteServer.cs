@@ -3,37 +3,62 @@
     #region Usings
     using System;
     using QlikView.Qvx.QvxLibrary;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Security.Principal;
     #endregion
 
     public class PSExecuteServer : QvxServer
     {
+        #region Logger
+        private static Logger logger = Logger.CreateLogger();
+        #endregion
+
         #region Methods      
         public override QvxConnection CreateConnection()
         {
-            return new PSExecuteConnection();
+            try
+            {
+                return new PSExecuteConnection();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "The connection could not be created.");
+                return null;
+            }
         }
 
         public override string CreateConnectionString()
         {
-            return "";
+            try
+            {
+                return "";
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "The connection string could not be created.");
+                return null;
+            }
         }
 
         public override string HandleJsonRequest(string method, string[] userParameters, QvxConnection connection)
-        {          
-            QvDataContractResponse response;
+        {
+            try
+            {
+                QvDataContractResponse response;
 
-            switch (method)
-            {                
-                default:
-                    response = new Info { qMessage = "Unknown command" };
-                    break;
+                switch (method)
+                {
+                    default:
+                        response = new Info { qMessage = "Unknown command" };
+                        break;
+                }
+
+                return ToJson(response);
             }
-
-            return ToJson(response);
-        }             
+            catch (Exception ex)
+            {
+                logger.Error(ex, "The json could not be read.");
+                return ToJson(new Info { qMessage = "Error" });
+            }
+        }
         #endregion
     }
 }

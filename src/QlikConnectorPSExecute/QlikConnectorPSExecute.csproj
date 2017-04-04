@@ -81,10 +81,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Frameworks\JSON\Json.601\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.4.5\lib\net45\NLog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="QvxLibrary, Version=2.1.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\QvxLibrary.dll</HintPath>
@@ -102,6 +98,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logger.cs" />
     <Compile Include="CryptoManager.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>

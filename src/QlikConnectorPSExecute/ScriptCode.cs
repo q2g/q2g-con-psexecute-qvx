@@ -6,13 +6,12 @@
     using System.Text.RegularExpressions;
     using Newtonsoft.Json;
     using System.Diagnostics;
-    using NLog;
     #endregion
 
     public class ScriptCode
     {
         #region Logger
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = Logger.CreateLogger();
         #endregion
 
         #region Constructor & Load

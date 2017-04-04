@@ -23,7 +23,7 @@ class ConnectDialog {
     }
 
     get connectionString(): string {
-        return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "" + "\"";
+        return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=localhost;" + "\"";
     }
 
     get titleText(): string {
@@ -64,6 +64,11 @@ class ConnectDialog {
                     });
             } else {
                 {
+                    if (typeof this.username === "undefined")
+                        this.username = "";
+                    if (typeof this.password === "undefined")
+                        this.password = "";
+
                     this.input.serverside.createNewConnection(this.name, this.connectionString, this.username, this.password);
                     this.destroyComponent();
                 }
