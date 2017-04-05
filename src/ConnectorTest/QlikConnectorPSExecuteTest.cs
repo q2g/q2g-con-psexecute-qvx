@@ -12,6 +12,7 @@
     using System.Management.Automation;
     using System.Security;
     using System.Linq;
+    using System.Text;
     #endregion
 
     [TestClass]
@@ -147,22 +148,33 @@
             conn.ExtractQuery(script, new List<QvxTable>());
         }
 
-        [TestCategory("PowerShellTest"), TestMethod]
+        [TestCategory("Test"), TestMethod]
         public void TestPowerShellCredentials()
         {
             var username = "test1";
             var password = "test1";
 
+            var script = CreateScript($"PSEXECUTE({{arg1: \"explorer\", arg2: \"rundll32\"}})\r\nGet-Process $args[0], $args[1]", null);
+
             using (var powerShell = PowerShell.Create())
             {
                 Environment.CurrentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-                var scriptBlock = ScriptBlock.Create("$env:username");
+
+                var values = new List<string>();
+                foreach (var psPara in script.Parameters)
+                    values.Add(psPara.Value);
+                
+
+                var scriptBlock = ScriptBlock.Create(script.Code);
 
                 powerShell.AddCommand("Start-Job");
                 powerShell.AddParameter("ScriptBlock", scriptBlock);
-                var secPass = new SecureString();
-                Array.ForEach(password.ToArray(), secPass.AppendChar);
-                powerShell.AddParameter("Credential", new PSCredential(username, secPass));
+                //var secPass = new SecureString();
+                //Array.ForEach(password.ToArray(), secPass.AppendChar);
+                //powerShell.AddParameter("Credential", new PSCredential(username, secPass));
+
+                powerShell.AddParameter("ArgumentList", values);
+
                 powerShell.AddCommand("Wait-Job");
                 powerShell.AddCommand("Receive-Job");
 
@@ -176,7 +188,7 @@
         [TestCategory("Test"), TestMethod]
         public void ArgumentTest()
         {
-            var script = $"PSEXECUTE({{arg1: \"WUDFHost\"}}) Get - Process $arg1 | Select - Object Name, Id";
+            var script = $"PSEXECUTE({{arg1: \"WUDFHost\"}}) Get-Process $arg1 | Select-Object Name, Id";
             var server = new PSExecuteServer();
             var conn = server.CreateConnection();
             conn.MParameters = new Dictionary<string, string>();

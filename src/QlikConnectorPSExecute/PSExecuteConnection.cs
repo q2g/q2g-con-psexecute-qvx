@@ -100,10 +100,14 @@
                         }
                     }
 
+                    var values = new List<string>();
+                    foreach (var psPara in script.Parameters)
+                        values.Add(psPara.Value);
+
                     powerShell.AddParameter("ScriptBlock", scriptBlock);
-                    //powerShell.AddParameters(script.Parameters);
-                    foreach (var p in script.Parameters)
-                      powerShell.Runspace.SessionStateProxy.PSVariable.Set(p.Key, p.Value);
+
+                    if(values.Count > 0)
+                      powerShell.AddParameter("ArgumentList", values);
 
                     // Wait for the Job to finish
                     powerShell.AddCommand("Wait-Job");
