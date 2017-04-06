@@ -84,11 +84,22 @@
                 if (manager != null)
                     CreateSignature(manager, OriginalScript);
 
-                var args = Regex.Match(OriginalScript, $"{ExecuteName}\\(({{[^}}]+}})\\)", RegexOptions.Singleline).Groups[1].Value;
-                Parameters = JsonConvert.DeserializeObject<Dictionary<string, string>>(args);
-                if (Parameters == null)
-                    Parameters = new Dictionary<string, string>();
+                //Read parameters with JSON
+                var args = Regex.Match(OriginalScript, $"{ExecuteName}\\((\\[[^\\]]+\\])\\)", RegexOptions.Singleline).Groups[1].Value;
 
+                try
+                {
+                    Parameters = JsonConvert.DeserializeObject<List<string>>(args);
+                }
+                catch(Exception ex)
+                {
+                    logger.Error(ex, "The script arguments could not be read in JSON.");
+                }
+                
+                if (Parameters == null)
+                    Parameters = new List<string>();
+
+                //Generate name for qlik table
                 TableName = Regex.Match(text, $"({ExecuteName}[^\\)]*\\))", RegexOptions.Singleline).Groups[1].Value;
                 if (String.IsNullOrEmpty(TableName))
                     TableName = ExecuteName;
@@ -104,6 +115,7 @@
 
         private void CreateSignature(CryptoManager manager, string script)
         {
+            //Generate signature
             var signature = manager.SignWithPrivateKey(Code, false, true, Algorithm);
             var fullSignature = $"{Algorithm}:\r\n{signature}";
 
@@ -143,7 +155,7 @@
         #endregion
 
         #region Variables & Properties
-        public Dictionary<string, string> Parameters { get; private set; }
+        public List<string> Parameters { get; private set; }
         public string Code { get; private set; }
         public string ScriptWithSign { get; private set; }
         public string TableName { get; private set; }

@@ -66,10 +66,16 @@
 
                 var manager = new CryptoManager(keyFile);
                 var script = ScriptCode.Create(tbxSign.Text, manager);
-                Clipboard.SetText(script.ScriptWithSign);
-                tbxSign.Text = script.ScriptWithSign;
-
-                ShowStatus("The code has been copied to the clipboard.");
+                if(script != null)
+                {
+                    Clipboard.SetText(script.ScriptWithSign);
+                    tbxSign.Text = script.ScriptWithSign;
+                    ShowStatus("The code has been copied to the clipboard.");
+                }
+                else
+                {
+                    ShowStatus("The script is broken and could not be signed.");
+                }
             }
             catch (Exception ex)
             {

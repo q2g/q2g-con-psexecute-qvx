@@ -20,6 +20,11 @@ namespace QlikConnectorPSExecute
             return new Logger();
         }
 
+        private string GetStamp()
+        {
+            return String.Format("yyyy-MM-dd/HH-mm-ss", DateTime.Now);
+        }
+
         public void Error(Exception ex, string message)
         {
             var sb = new StringBuilder(ex.Message);
@@ -31,12 +36,12 @@ namespace QlikConnectorPSExecute
                     sb.AppendLine(currentEx.Message);
             }
 
-            File.AppendAllText(LogPath, sb.ToString());
+            File.AppendAllText(LogPath, $"[{GetStamp()}]{sb.ToString()}");
         }
 
         public void Warn(string message)
         {
-            File.AppendAllText(LogPath, message);
+            File.AppendAllText(LogPath, $"[{GetStamp()}]message");
         }
     }
 }

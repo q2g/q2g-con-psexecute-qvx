@@ -100,14 +100,10 @@
                         }
                     }
 
-                    var values = new List<string>();
-                    foreach (var psPara in script.Parameters)
-                        values.Add(psPara.Value);
-
                     powerShell.AddParameter("ScriptBlock", scriptBlock);
 
-                    if(values.Count > 0)
-                      powerShell.AddParameter("ArgumentList", values);
+                    if(script.Parameters.Count > 0)
+                      powerShell.AddParameter("ArgumentList", script.Parameters);
 
                     // Wait for the Job to finish
                     powerShell.AddCommand("Wait-Job");
