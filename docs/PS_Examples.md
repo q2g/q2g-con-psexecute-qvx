@@ -14,7 +14,7 @@ Result
 
 ![dirlist](images/PS_Example1_Result.png)
 
-Use With Arguments 
+Use with arguments 
 ```
 LIB CONNECT TO 'test';
 
