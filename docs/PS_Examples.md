@@ -13,3 +13,14 @@ Get-ChildItem -Force C:\ | Select-Object Name, CreationTime;
 Result
 
 ![dirlist](images/PS_Example1_Result.png)
+
+Usage with arguments 
+```
+LIB CONNECT TO 'test';
+
+SQL PSEXECUTE(["explorer", "rundll32"])
+Get-Process $args[0], $args[1] | Select-Object Name, Id;
+```
+Result
+
+![dirlist](images/PS_Example2_Result.png)
