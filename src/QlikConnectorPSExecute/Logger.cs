@@ -8,21 +8,22 @@ using System.Threading.Tasks;
 
 namespace QlikConnectorPSExecute
 {
-    public class Logger
+    public class PseLogger
     {
         private static string LogPath { get; set; }
 
-        private Logger() { }
+        private PseLogger() { }
 
-        public static Logger CreateLogger()
+        public static PseLogger CreateLogger()
         {
             LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Connector.log");
-            return new Logger();
+            return new PseLogger();
         }
 
         private string GetStamp()
         {
-            return String.Format("yyyy-MM-dd/HH-mm-ss", DateTime.Now);
+            var stemp = String.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now);
+            return stemp;
         }
 
         public void Error(Exception ex, string message)
@@ -36,12 +37,12 @@ namespace QlikConnectorPSExecute
                     sb.AppendLine(currentEx.Message);
             }
 
-            File.AppendAllText(LogPath, $"[{GetStamp()}]{sb.ToString()}");
+            File.AppendAllText(LogPath, $"[{GetStamp()}] {sb.ToString()}");
         }
 
         public void Warn(string message)
         {
-            File.AppendAllText(LogPath, $"[{GetStamp()}]message");
+            File.AppendAllText(LogPath, $"[{GetStamp()}] {message}");
         }
     }
 }

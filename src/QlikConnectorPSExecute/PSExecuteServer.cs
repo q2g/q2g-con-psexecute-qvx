@@ -8,7 +8,7 @@
     public class PSExecuteServer : QvxServer
     {
         #region Logger
-        private static Logger logger = Logger.CreateLogger();
+        private static PseLogger logger = PseLogger.CreateLogger();
         #endregion
 
         #region Methods      

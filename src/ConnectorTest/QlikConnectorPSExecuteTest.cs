@@ -22,6 +22,7 @@
         private string SignString { get; } = "LxLLGoR2J6CiMcDbalMKtTgfvVmbkrtJIoLSVFZL1Mj37vUzhYeNBfo0+M1tpGn8hIEKw0wFKnwZ\r\n1h+p+HgLNA34eWw/cYSqqs4zuBh6FEIW738dWlFg4xEG3GeKoCFt5mpaKzZbQoKMYFV0JcTv0rIO\r\nXeeLpZR4UcJ4CAUTLpM6Dw3PmwIHQ05+v3txMZBSojSRpdpfJZ9Thps/5idyCG6VenXiPfU4ktQ7\r\n5HTFK8HBjL+DHKHPgcTsLXMskZVunerDBvE7kQjNCWD6bYgUEyirWOK1sNq+cHJg2j5LWWZ5QgOk\r\n/gF0g1UOl0CVPDM0phRuca4Yp3oT6VArpjcwGw==";
         private string SignStringWrong { get; } = "JEEH+B2Nu6Me0IQlJhPJuTDF93cKRRoen7Zhc7SvD30CGbJcQ6NCcjDjwzLyJ7kHiEhabIdSlLch\r\nFhvIYhirIh7OkNPCqHazVcKK4VtrFvutzQfFlq+bAw063HSdJ4WCjTsl1brUj3dn60EAhh7L4pMQ\r\ndzbUTsJwrAGUO/CjjVuriPTH4d1aFZWcwTDLje5QGcJmFeEWzOtNHfW2toBDpC3aykQ10ZaDCn1t\r\nwSW/0MJcPpd18tBBnsvBnFHO1us7J0fc9BzlrleSprj8baUxEb07gvs9rDDQZTonVT91EyZ3qzm4\r\nbuhXBino1jzb5P9p1Pp8VVG8us8CSZDIvw4nfw==";
         private string SignStringArgs { get; } = "aW6fYJ1n+CBBaXpKVsE66jfqKmfzJ3k9/1CXiTw1CkWhkMKCrED0vU1poJOipam0K8mzg0fUFAp3+Y2ZJQXUmWYQZS/gr0isYOP1Ys0Po7dqfXq+npwC8C7xfhi8Wbil8xFF9pzwq+A17w8OUa2uhjk7ylg+U50Qye22YTO/YI+YpEr6UpoqCwrMvfMg+yCwp8kRVcRhBjuGTqOM2/GUfijUeEsV8zNvhoazIK2zluOmAQoSEhKhZ9YnpDduicsT1vW7HSNjkeez1BQlMzJXs5sys5XBKHrZp1rO0JmBV5NQ+bmQGyHi6rYkqAtDLSzBdiG26w6X7Dg/Wedl4LpU7w==";
+        private string SignString2 { get; } = "aW6fYJ1n+CBBaXpKVsE66jfqKmfzJ3k9/1CXiTw1CkWhkMKCrED0vU1poJOipam0K8mzg0fUFAp3+Y2ZJQXUmWYQZS/gr0isYOP1Ys0Po7dqfXq+npwC8C7xfhi8Wbil8xFF9pzwq+A17w8OUa2uhjk7ylg+U50Qye22YTO/YI+YpEr6UpoqCwrMvfMg+yCwp8kRVcRhBjuGTqOM2/GUfijUeEsV8zNvhoazIK2zluOmAQoSEhKhZ9YnpDduicsT1vW7HSNjkeez1BQlMzJXs5sys5XBKHrZp1rO0JmBV5NQ+bmQGyHi6rYkqAtDLSzBdiG26w6X7Dg/Wedl4LpU7w==";
 
         private string Args { get; } = "[\"explorer\", \"rundll32\"]";
 
@@ -159,12 +160,13 @@
         [TestCategory("PowerShellTest"), TestMethod]
         public void CheckTestConnectionWithoutCredentials()
         {
-            var script = $"PSEXECUTE({Args})\r\n{GetCommand(true)}\r\nSHA256:\r\n{SignString};";
+            //var script = $"PSEXECUTE({Args})\r\n{GetCommand(true)}\r\nSHA256:\r\n{SignString2};";
+            var script = File.ReadAllText(@"C:\Users\MBerthold\Documents\test1.txt");
             var server = new PSExecuteServer();
             var conn = server.CreateConnection();
             conn.MParameters = new Dictionary<string, string>();
             conn.Init();
-            conn.ExtractQuery(script, new List<QvxTable>());
+            var table = conn.ExtractQuery(script, new List<QvxTable>());
         }
 
         [TestCategory("PowerShellTest"), TestMethod]

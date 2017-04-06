@@ -7,11 +7,6 @@
 
     static class Program
     {
-        //Doku weiterführen
-        //Git-Komponente durschlesen
-        //Connector im Server testen (Signierung)
-        //Xcopy umbauen in Project file
-
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
         /// </summary>

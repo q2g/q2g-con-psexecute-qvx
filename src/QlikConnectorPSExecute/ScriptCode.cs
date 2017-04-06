@@ -11,7 +11,7 @@
     public class ScriptCode
     {
         #region Logger
-        private static Logger logger = Logger.CreateLogger();
+        private static PseLogger logger = PseLogger.CreateLogger();
         #endregion
 
         #region Constructor & Load
@@ -143,6 +143,9 @@
             try
             {
                 var text = OriginalScript.Replace("\r\n", "\n");
+                if (!text.EndsWith(";"))
+                    text = $"{text};";
+
                 var signature = Regex.Match(text, $"{Algorithm}:\n([^;]*);", RegexOptions.Singleline).Groups[1].Value;
                 return signature.Replace("\n", "\r\n");
             }
@@ -160,7 +163,7 @@
         public string ScriptWithSign { get; private set; }
         public string TableName { get; private set; }
 
-        private string OriginalScript { get; set; }
+        public string OriginalScript { get; set; }
         private string ExecuteName { get; set; } = "PSEXECUTE";
         private string Algorithm { get; set; } = "SHA256";
         #endregion

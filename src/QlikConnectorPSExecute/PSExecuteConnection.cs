@@ -16,7 +16,7 @@
     public class PSExecuteConnection : QvxConnection
     {
         #region Logger
-        private static Logger logger = Logger.CreateLogger();
+        private static PseLogger logger = PseLogger.CreateLogger();
         #endregion
 
         #region Properties & Variables
@@ -88,15 +88,18 @@
                     }
                     else
                     {
-                        // without check signature
-                        var signature = script.GetSignature();
-                        if (Manager == null)
-                            return resultTable;
-
-                        if(!Manager.IsValidPublicKey(script.Code, signature))
+                        if (!IsQlikDesktopApp)
                         {
-                            logger.Warn("The signature could not be valid.");
-                            return resultTable;
+                            // without check signature
+                            var signature = script.GetSignature();
+                            if (Manager == null)
+                                return resultTable;
+
+                            if (!Manager.IsValidPublicKey(script.Code, signature))
+                            {
+                                logger.Warn("The signature could not be valid.  ?" + script.Code + "?" + signature + "?" + script.OriginalScript);
+                                return resultTable;
+                            }
                         }
                     }
 

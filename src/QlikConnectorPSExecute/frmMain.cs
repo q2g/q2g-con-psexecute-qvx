@@ -74,7 +74,7 @@
                 }
                 else
                 {
-                    ShowStatus("The script is broken and could not be signed.");
+                    ShowStatus("The script is incorrect and could not be signed.");
                 }
             }
             catch (Exception ex)
