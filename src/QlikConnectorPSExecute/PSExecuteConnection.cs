@@ -97,7 +97,7 @@
 
                             if (!Manager.IsValidPublicKey(script.Code, signature))
                             {
-                                logger.Warn("The signature could not be valid.  ?" + script.Code + "?" + signature + "?" + script.OriginalScript);
+                                logger.Warn("The signature could not be valid.");
                                 return resultTable;
                             }
                         }
