@@ -19,7 +19,7 @@ Use with arguments
 LIB CONNECT TO 'test';
 
 SQL PSEXECUTE(["explorer", "rundll32"])
-Get-Process $args[0], $args[1] | Select-Object Name, Id
+Get-Process $args[0], $args[1] | Select-Object Name, Id;
 ```
 Result
 ![dirlist](images/PS_Example2_Result.png)
