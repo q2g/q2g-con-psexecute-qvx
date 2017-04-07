@@ -89,6 +89,13 @@
         }
 
         [TestCategory("ScriptTest"), TestMethod]
+        public void ScriptWithoutBreak()
+        {
+            var result = TestScript($" PSEXECUTE() {GetCommand(false)}\n SHA256:\n{SignString};");
+            Assert.AreEqual(result, true);
+        }
+
+        [TestCategory("ScriptTest"), TestMethod]
         public void ScriptWithNoArguments()
         {
             var result = TestScript($" PSEXECUTE()\r\n  {GetCommand(false)}\r\n\r\n SHA256:\r\n{SignString};");
@@ -155,6 +162,7 @@
             conn.MParameters.Add("password", credentials.Password);
             conn.Init();
             conn.ExtractQuery(script, new List<QvxTable>());
+            Assert.Inconclusive();
         }
 
         [TestCategory("PowerShellTest"), TestMethod]
@@ -166,6 +174,7 @@
             conn.MParameters = new Dictionary<string, string>();
             conn.Init();
             var table = conn.ExtractQuery(script, new List<QvxTable>());
+            Assert.Inconclusive();
         }
 
         [TestCategory("PowerShellTest"), TestMethod]

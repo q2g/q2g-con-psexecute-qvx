@@ -93,8 +93,11 @@
                             // without check signature
                             var signature = script.GetSignature();
                             if (Manager == null)
+                            {
+                                logger.Warn("No Certificate file found.");
                                 return resultTable;
-
+                            }
+                                
                             if (!Manager.IsValidPublicKey(script.Code, signature))
                             {
                                 logger.Warn("The signature could not be valid.");
