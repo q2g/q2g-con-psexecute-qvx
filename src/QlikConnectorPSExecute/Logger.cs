@@ -1,25 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QlikConnectorPSExecute
+﻿namespace QlikConnectorPSExecute
 {
+    #region Usings
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    #endregion
+
     public class PseLogger
     {
+        #region Properties & Variables
         private static string LogPath { get; set; }
+        #endregion
 
+        #region Constructor
         private PseLogger() { }
+        #endregion
 
+        #region Static Methods
         public static PseLogger CreateLogger()
         {
             LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Connector.log");
             return new PseLogger();
         }
+        #endregion
 
+        #region Methods
         private string GetStamp()
         {
             var stemp = String.Format("{0:yyyy-MM-dd_HH-mm-ss}", DateTime.Now);
@@ -44,5 +51,6 @@ namespace QlikConnectorPSExecute
         {
             File.AppendAllText(LogPath, $"[{GetStamp()}] {message}");
         }
+        #endregion
     }
 }

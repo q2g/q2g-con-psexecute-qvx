@@ -160,8 +160,7 @@
         [TestCategory("PowerShellTest"), TestMethod]
         public void CheckTestConnectionWithoutCredentials()
         {
-            //var script = $"PSEXECUTE({Args})\r\n{GetCommand(true)}\r\nSHA256:\r\n{SignString2};";
-            var script = File.ReadAllText(@"C:\Users\MBerthold\Documents\test1.txt");
+            var script = $"PSEXECUTE({Args})\r\n{GetCommand(true)}\r\nSHA256:\r\n{SignString2};";
             var server = new PSExecuteServer();
             var conn = server.CreateConnection();
             conn.MParameters = new Dictionary<string, string>();

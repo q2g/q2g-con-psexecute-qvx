@@ -14,6 +14,17 @@
         private static PseLogger logger = PseLogger.CreateLogger();
         #endregion
 
+        #region Variables & Properties
+        public List<string> Parameters { get; private set; }
+        public string Code { get; private set; }
+        public string ScriptWithSign { get; private set; }
+        public string TableName { get; private set; }
+
+        public string OriginalScript { get; set; }
+        private string ExecuteName { get; set; } = "PSEXECUTE";
+        private string Algorithm { get; set; } = "SHA256";
+        #endregion
+
         #region Constructor & Load
         private ScriptCode(string script)
         {
@@ -155,17 +166,6 @@
                 return null;
             }
         }
-        #endregion
-
-        #region Variables & Properties
-        public List<string> Parameters { get; private set; }
-        public string Code { get; private set; }
-        public string ScriptWithSign { get; private set; }
-        public string TableName { get; private set; }
-
-        public string OriginalScript { get; set; }
-        private string ExecuteName { get; set; } = "PSEXECUTE";
-        private string Algorithm { get; set; } = "SHA256";
         #endregion
     }
 

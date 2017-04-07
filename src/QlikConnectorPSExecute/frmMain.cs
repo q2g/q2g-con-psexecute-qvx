@@ -37,8 +37,15 @@
         #region Event-Handler
         private void Timer_Tick(object sender, EventArgs e)
         {
-            lblStatus.Text = "Status:";
-            timer.Stop();
+            try
+            {
+                lblStatus.Text = "Status:";
+                timer.Stop();
+            }
+            catch (Exception ex)
+            {
+                ShowStatus(ex.Message, false);
+            }
         }
 
         private void btnClose_Click(object sender, EventArgs e)

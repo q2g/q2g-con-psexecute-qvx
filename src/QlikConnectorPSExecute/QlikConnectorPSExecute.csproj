@@ -188,10 +188,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(ProjectDir)lib\verpatch.exe" "$(TargetPath)" /s "QlikView Connector" "PS Execute Connector"
-
-xcopy "$(TargetDir)*.*" "%25appdata%25\..\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute" /s /e /y /i /r /q
-xcopy "$(TargetDir)*.*" "C:\Program Files\Common Files\Qlik\Custom Data\QlikConnectorPSExecute" /s /e /y /i /r /q</PostBuildEvent>
+    <PostBuildEvent>"$(ProjectDir)lib\verpatch.exe" "$(TargetPath)" /s "QlikView Connector" "PS Execute Connector"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.3.6.5\build\dotnet\GitVersionTask.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -221,7 +218,21 @@ xcopy "$(TargetDir)*.*" "C:\Program Files\Common Files\Qlik\Custom Data\QlikConn
     <Zip ZipFileName="bin\$(AssemblyName).zip" WorkingDirectory="$(OutputPath)\" Files="@(ZipFiles)" />
   </Target>
   <Target Name="AfterBuild">
+    <PropertyGroup>
+      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\QlikConnectorPSExecute</QlikServerPath>
+      <QlikServerPathWeb>$(QlikServerPath)\web</QlikServerPathWeb>
+      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute</QlikDesktopPath>
+      <QlikDesktopPathWeb>$(QlikDesktopPath)\web</QlikDesktopPathWeb>
+    </PropertyGroup>
+    <ItemGroup>
+      <OutputFiles Include="$(OutputPath)\*.*" />
+      <OutputWeb Include="$(OutputPath)\web\*.*" />
+    </ItemGroup>
     <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputWeb)" DestinationFolder="$(QlikServerPathWeb)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputWeb)" DestinationFolder="$(QlikDesktopPathWeb)" OverwriteReadOnlyFiles="true" />
   </Target>
   <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>

@@ -13,6 +13,7 @@
                 <label class="lui-label">Password</label>
                 <input class="lui-input" type="password" ng-model="vm.password" placeholder="Password" />
                 <div class="lui-label connectionInfo" ng-class="{'success': connectionSuccessful}">{{vm.connectionInfo}}</div>
+                <label class="lui-label">If you do not assign a password, a signing is required.</label>
             </div>
             <div class="lui-dialog__footer">
                 <button class="lui-button lui-dialog__button" ng-click="vm.onCancelClicked()">Cancel</button>

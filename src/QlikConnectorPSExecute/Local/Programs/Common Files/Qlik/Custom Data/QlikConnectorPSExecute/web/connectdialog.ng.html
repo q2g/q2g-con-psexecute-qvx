@@ -1,0 +1,24 @@
+﻿<div class="qveventlogconnectdialogcontainer">
+    <div class="lui-modal-background"></div>
+    <div class="qveventlogconnectdialog" qv-global-escape="vm.onEscape()">
+        <div class="lui-dialog" style="width: 400px; height:400px">
+            <div class="lui-dialog__header">
+                <div class="lui-dialog__title">{{vm.titleText}}</div>
+            </div>
+            <div class="lui-dialog__body">
+                <label class="lui-label">Connection Name</label>
+                <input class="lui-input" type="text" ng-model="vm.name" placeholder="Connection name" />
+                <label class="lui-label">Username</label>
+                <input class="lui-input" type="text" ng-model="vm.username" placeholder="Username" />
+                <label class="lui-label">Password</label>
+                <input class="lui-input" type="password" ng-model="vm.password" placeholder="Password" />
+                <div class="lui-label connectionInfo" ng-class="{'success': connectionSuccessful}">{{vm.connectionInfo}}</div>
+                <label class="lui-label">If you do not assign a password, a signing is required.</label>
+            </div>
+            <div class="lui-dialog__footer">
+                <button class="lui-button lui-dialog__button" ng-click="vm.onCancelClicked()">Cancel</button>
+                <button class="lui-button lui-dialog__button close-button" ng-click="vm.onOKClicked()" ng-disabled="!vm.isOkEnabled" q-translation="{{vm.saveButtonText}}"></button>
+            </div>
+        </div>
+    </div>
+</div>
