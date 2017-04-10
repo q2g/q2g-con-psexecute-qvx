@@ -218,6 +218,10 @@
     <Zip ZipFileName="bin\$(AssemblyName).zip" WorkingDirectory="$(OutputPath)\" Files="@(ZipFiles)" />
   </Target>
   <Target Name="AfterBuild">
+    <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />  
+	<CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />  
+  </Target>
+  <Target Name="DebugCopy">
     <PropertyGroup>
       <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\QlikConnectorPSExecute</QlikServerPath>
       <QlikServerPathWeb>$(QlikServerPath)\web</QlikServerPathWeb>
@@ -228,10 +232,9 @@
       <OutputFiles Include="$(OutputPath)\*.*" />
       <OutputWeb Include="$(OutputPath)\web\*.*" />
     </ItemGroup>
-    <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)" OverwriteReadOnlyFiles="true"  />
     <Copy SourceFiles="@(OutputWeb)" DestinationFolder="$(QlikServerPathWeb)" OverwriteReadOnlyFiles="true" />
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)" OverwriteReadOnlyFiles="true"  />
     <Copy SourceFiles="@(OutputWeb)" DestinationFolder="$(QlikDesktopPathWeb)" OverwriteReadOnlyFiles="true" />
   </Target>
   <PropertyGroup>

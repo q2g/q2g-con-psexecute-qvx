@@ -3,8 +3,10 @@
     #region Usings
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     #endregion
 
@@ -21,7 +23,19 @@
         #region Static Methods
         public static PseLogger CreateLogger()
         {
-            LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Connector.log");
+            var connectorPath = Assembly.GetExecutingAssembly().Location;
+            if(connectorPath.EndsWith("\\QlikConnectorPSExecute\\QlikConnectorPSExecute.exe"))
+            {
+                connectorPath = Path.Combine(Path.GetDirectoryName(connectorPath), "Log");
+                Directory.CreateDirectory(connectorPath);
+                connectorPath = Path.Combine(connectorPath, "Connector.log");
+            }
+            else
+            {
+                connectorPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Connector.log");
+            }
+
+            LogPath = connectorPath;
             return new PseLogger();
         }
         #endregion
@@ -33,6 +47,11 @@
             return stemp;
         }
 
+        private void Write(string message)
+        {
+            File.AppendAllText(LogPath, $"\r\n[{GetStamp()}] {message.Trim()}");
+        }
+
         public void Error(Exception ex, string message)
         {
             var sb = new StringBuilder(ex.Message);
@@ -41,15 +60,15 @@
             {
                 currentEx = currentEx.InnerException;
                 if (currentEx != null)
-                    sb.AppendLine(currentEx.Message);
+                    sb.Append("\r\n" + currentEx.Message);
             }
 
-            File.AppendAllText(LogPath, $"[{GetStamp()}] {sb.ToString()}");
+            Write($"{message} - {sb.ToString()}");
         }
 
         public void Warn(string message)
         {
-            File.AppendAllText(LogPath, $"[{GetStamp()}] {message}");
+            Write(message);
         }
         #endregion
     }

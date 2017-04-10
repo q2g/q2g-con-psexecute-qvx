@@ -115,8 +115,6 @@
                 if (String.IsNullOrEmpty(TableName))
                     TableName = ExecuteName;
 
-                logger.Warn("Step1");
-
                 return true;
             }
             catch (Exception ex)

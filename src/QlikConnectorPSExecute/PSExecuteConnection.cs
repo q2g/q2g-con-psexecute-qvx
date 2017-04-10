@@ -94,7 +94,7 @@
                             var signature = script.GetSignature();
                             if (Manager == null)
                             {
-                                logger.Warn("No Certificate file found.");
+                                logger.Warn("No Certificate file found or no access.");
                                 return resultTable;
                             }
                                 

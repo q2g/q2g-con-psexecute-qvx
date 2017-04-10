@@ -1,4 +1,7 @@
-﻿<div class="qveventlogconnectdialogcontainer">
+﻿<!--
+
+-->
+<div class="qveventlogconnectdialogcontainer">
     <div class="lui-modal-background"></div>
     <div class="qveventlogconnectdialog" qv-global-escape="vm.onEscape()">
         <div class="lui-dialog" style="width: 400px; height:400px">
@@ -16,6 +19,7 @@
                 <label class="lui-label">If you do not assign a password, a signing is required.</label>
             </div>
             <div class="lui-dialog__footer">
+                <label class="lui-label powered">Powered by akquinet</label>
                 <button class="lui-button lui-dialog__button" ng-click="vm.onCancelClicked()">Cancel</button>
                 <button class="lui-button lui-dialog__button close-button" ng-click="vm.onOKClicked()" ng-disabled="!vm.isOkEnabled" q-translation="{{vm.saveButtonText}}"></button>
             </div>

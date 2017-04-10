@@ -208,12 +208,26 @@
         [TestCategory("PowerShellTest"), TestMethod]
         public void ArgumentTest()
         {
-            var script = $"PSEXECUTE([\"explorer\", 99])\r\nGet-Process $args[0], $args[1]";
+            var script = $"PSEXECUTE([\"explorer\", 99])\r\nGet-Proces $args[0], $args[1]";
             var server = new PSExecuteServer();
             var conn = server.CreateConnection();
             conn.MParameters = new Dictionary<string, string>();
+            conn.MParameters.Add("userid", "mberthold");
+            conn.MParameters.Add("password", "2u8m7v");
             conn.Init();
             conn.ExtractQuery(script, new List<QvxTable>());
+        }
+
+        [TestCategory("Logger"), TestMethod]
+        public void LoggerTest()
+        {
+            var logger = PseLogger.CreateLogger();
+            logger.Warn("TestWarning");
+
+            var subex = new Exception("SubExeption");
+            var ex = new Exception("MainExeption", subex);
+            logger.Error(ex, "TestError");
+            logger.Error(ex, "TestError");
         }
     }
 }

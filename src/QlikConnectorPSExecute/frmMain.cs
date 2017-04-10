@@ -67,7 +67,7 @@
                 var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
                 if(!File.Exists(keyFile))
                 {
-                    ShowStatus("The certificate file does not exist.");
+                    ShowStatus($"The certificate file {keyFile} does not exist or has no authorization.");
                     return;
                 }
 
