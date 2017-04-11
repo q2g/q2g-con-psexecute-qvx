@@ -1,4 +1,13 @@
-﻿namespace ConnectorTest
+﻿#region License
+/*
+Copyright (c) 2017 akquinet
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+#endregion
+
+namespace ConnectorTest
 {
     #region Usings
     using System;
@@ -63,7 +72,7 @@
 
         private NetworkCredential GetTestUserCredentials()
         {
-            //Normal system user account
+            //The Standard User Account must be created manually.
             return new NetworkCredential("test1", "test1");
         }
 
@@ -152,6 +161,7 @@
         [TestCategory("PowerShellTest"), TestMethod]
         public void CheckTestConnectionWithCredentials()
         {
+            //The Standard User Account must be created manually.
             var credentials = GetTestUserCredentials();
 
             var script = $"PSEXECUTE({Args})\r\n{GetCommand(true)}\r\nSHA256:\r\n{SignString};";
@@ -162,7 +172,7 @@
             conn.MParameters.Add("password", credentials.Password);
             conn.Init();
             conn.ExtractQuery(script, new List<QvxTable>());
-            Assert.Inconclusive();
+            Assert.Inconclusive("NO RES");
         }
 
         [TestCategory("PowerShellTest"), TestMethod]
@@ -174,12 +184,13 @@
             conn.MParameters = new Dictionary<string, string>();
             conn.Init();
             var table = conn.ExtractQuery(script, new List<QvxTable>());
-            Assert.Inconclusive();
+            Assert.Inconclusive("The result will only be evaluated in the future.");
         }
 
         [TestCategory("PowerShellTest"), TestMethod]
         public void TestPowerShellCredentials()
         {
+            //The Standard User Account must be created manually.
             var credentials = GetTestUserCredentials();
 
             var script = CreateScript($"PSEXECUTE()\r\n$env:username", null);
@@ -201,21 +212,8 @@
                 var results = powerShell.Invoke();
                 var errors = powerShell.Streams.Error.ReadAll();
                 Assert.AreEqual(errors.Count, 0);
-                Assert.AreEqual(results[0].ToString(), "test1");
+                Assert.AreEqual(results[0].ToString(), credentials.UserName);
             }
-        }
-
-        [TestCategory("PowerShellTest"), TestMethod]
-        public void ArgumentTest()
-        {
-            var script = $"PSEXECUTE([\"explorer\", 99])\r\nGet-Proces $args[0], $args[1]";
-            var server = new PSExecuteServer();
-            var conn = server.CreateConnection();
-            conn.MParameters = new Dictionary<string, string>();
-            conn.MParameters.Add("userid", "mberthold");
-            conn.MParameters.Add("password", "2u8m7v");
-            conn.Init();
-            conn.ExtractQuery(script, new List<QvxTable>());
         }
 
         [TestCategory("Logger"), TestMethod]

@@ -13,7 +13,7 @@
     public class PseLogger
     {
         #region Properties & Variables
-        private static string LogPath { get; set; }
+        public static string LogPath { get; set; }
         #endregion
 
         #region Constructor
@@ -38,6 +38,20 @@
             LogPath = connectorPath;
             return new PseLogger();
         }
+
+        public static string GetFullExceptionString(Exception ex)
+        {
+            var sb = new StringBuilder(ex.Message);
+            Exception currentEx = ex;
+            while (currentEx.InnerException != null)
+            {
+                currentEx = currentEx.InnerException;
+                if (currentEx != null)
+                    sb.Append("\r\n" + currentEx.Message);
+            }
+
+            return sb.ToString();
+        }
         #endregion
 
         #region Methods
@@ -54,16 +68,8 @@
 
         public void Error(Exception ex, string message)
         {
-            var sb = new StringBuilder(ex.Message);
-            Exception currentEx = ex;
-            while (currentEx.InnerException != null)
-            {
-                currentEx = currentEx.InnerException;
-                if (currentEx != null)
-                    sb.Append("\r\n" + currentEx.Message);
-            }
-
-            Write($"{message} - {sb.ToString()}");
+            var exMessage = GetFullExceptionString(ex);
+            Write($"{message} - {exMessage}");
         }
 
         public void Warn(string message)
