@@ -224,18 +224,13 @@
   <Target Name="DebugCopy">
     <PropertyGroup>
       <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\QlikConnectorPSExecute</QlikServerPath>
-      <QlikServerPathWeb>$(QlikServerPath)\web</QlikServerPathWeb>
       <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute</QlikDesktopPath>
-      <QlikDesktopPathWeb>$(QlikDesktopPath)\web</QlikDesktopPathWeb>
     </PropertyGroup>
     <ItemGroup>
-      <OutputFiles Include="$(OutputPath)\*.*" />
-      <OutputWeb Include="$(OutputPath)\web\*.*" />
+      <OutputFiles Include="$(OutputPath)\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)" OverwriteReadOnlyFiles="true"  />
-    <Copy SourceFiles="@(OutputWeb)" DestinationFolder="$(QlikServerPathWeb)" OverwriteReadOnlyFiles="true" />
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)" OverwriteReadOnlyFiles="true"  />
-    <Copy SourceFiles="@(OutputWeb)" DestinationFolder="$(QlikDesktopPathWeb)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" />
   </Target>
   <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>

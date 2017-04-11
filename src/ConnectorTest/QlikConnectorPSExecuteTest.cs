@@ -216,8 +216,8 @@ namespace ConnectorTest
             }
         }
 
-        [TestCategory("Logger"), TestMethod]
-        public void LoggerTest()
+        [TestCategory("LoggerTest"), TestMethod]
+        public void CreateLogger()
         {
             var logger = PseLogger.CreateLogger();
             logger.Warn("TestWarning");
