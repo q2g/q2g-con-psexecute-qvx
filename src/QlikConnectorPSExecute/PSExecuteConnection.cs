@@ -21,6 +21,7 @@ namespace QlikConnectorPSExecute
     using System.Diagnostics;
     using System.Security;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Threading;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
@@ -31,6 +32,23 @@ namespace QlikConnectorPSExecute
 
         #region Properties & Variables
         private CryptoManager Manager { get; set; }
+        private DataTable internalData;
+        private QvxField[] fields;
+
+        private bool IsQlikDesktopApp
+        {
+            get
+            {
+                try
+                {
+                    return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
         #endregion
 
         #region Init
@@ -75,7 +93,7 @@ namespace QlikConnectorPSExecute
         {
             var actualWorkDir = Environment.CurrentDirectory;
             var resultTable = new DataTable();
-
+            Thread.Sleep(10000);
             try
             {
                 var Errors = new StringBuilder();
@@ -85,13 +103,14 @@ namespace QlikConnectorPSExecute
 
                 using (var powerShell = PowerShell.Create())
                 {
-                    Environment.CurrentDirectory = workdir;
+                    Environment.CurrentDirectory = @"C:\Temp\";
+                    logger.Warn("************"+ workdir);
                     var scriptBlock = ScriptBlock.Create(script.Code);
                     powerShell.AddCommand("Start-Job");
 
                     if (username != "" && password != "")
                     {
-                        logger.Warn($"TEST: -User:{username} -Pass:{password}");
+                        logger.Warn($"TEST: -User:{username} -Pass:{password.Length}");
                         
                         // if username & password are defined -> add as credentials
                         var secPass = new SecureString();
@@ -127,8 +146,9 @@ namespace QlikConnectorPSExecute
                     powerShell.AddCommand("Wait-Job");
                     // Give all results and not the jobs back
                     powerShell.AddCommand("Receive-Job");
-
+                    
                     var results = powerShell.Invoke();
+
                     foreach (var error in powerShell.Streams.Error.ReadAll())
                     {
                         var exString = PseLogger.GetFullExceptionString(error.Exception);
@@ -170,24 +190,6 @@ namespace QlikConnectorPSExecute
 
             return resultTable;
         }
-
-        private bool IsQlikDesktopApp
-        {
-            get
-            {
-                try
-                {
-                    return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
-
-        private DataTable internalData;
-        private QvxField[] fields;
 
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
         {
