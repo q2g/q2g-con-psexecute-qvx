@@ -23,6 +23,8 @@ namespace ConnectorTest
     using System.Linq;
     using System.Text;
     using System.Net;
+    using System.Diagnostics;
+    using Newtonsoft.Json.Linq;
     #endregion
 
     [TestClass]
@@ -101,7 +103,7 @@ namespace ConnectorTest
         public void ScriptWithoutBreak()
         {
             var result = TestScript($" PSEXECUTE() {GetCommand(false)}\n SHA256:\n{SignString};");
-            Assert.AreEqual(result, true);
+            Assert.AreEqual(result, false);
         }
 
         [TestCategory("ScriptTest"), TestMethod]
@@ -172,7 +174,7 @@ namespace ConnectorTest
             conn.MParameters.Add("password", credentials.Password);
             conn.Init();
             conn.ExtractQuery(script, new List<QvxTable>());
-            Assert.Inconclusive("NO RES");
+            Assert.Inconclusive("The result will only be evaluated in the future.");
         }
 
         [TestCategory("PowerShellTest"), TestMethod]

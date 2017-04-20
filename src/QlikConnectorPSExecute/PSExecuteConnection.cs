@@ -22,6 +22,9 @@ namespace QlikConnectorPSExecute
     using System.Security;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Threading;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+    using System.Reflection;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
@@ -32,9 +35,7 @@ namespace QlikConnectorPSExecute
 
         #region Properties & Variables
         private CryptoManager Manager { get; set; }
-        private DataTable internalData;
-        private QvxField[] fields;
-
+    
         private bool IsQlikDesktopApp
         {
             get
@@ -68,32 +69,13 @@ namespace QlikConnectorPSExecute
         #endregion
 
         #region Methods
-        private IEnumerable<QvxDataRow> GetPowerShellResult()
-        {
-            var result = new List<QvxDataRow>();
-            try
-            {
-                foreach (DataRow dataRow in internalData.Rows)
-                {
-                    var row = new QvxDataRow();
-                    for (int i = 0; i < dataRow.ItemArray.Length; i++)
-                    {
-                        row[fields[i]] = dataRow[i].ToString();
-                    }
-
-                    result.Add(row);
-                }
-            }
-            catch { }
-
-            return result;
-        }
-
-        private DataTable GetData(ScriptCode script, string username, string password, string workdir)
+        private QvxTable GetData(ScriptCode script, string username, string password, string workdir)
         {
             var actualWorkDir = Environment.CurrentDirectory;
-            var resultTable = new DataTable();
+            var resultTable = new QvxTable();
+            resultTable.TableName = script.TableName;
             Thread.Sleep(10000);
+
             try
             {
                 var Errors = new StringBuilder();
@@ -101,21 +83,28 @@ namespace QlikConnectorPSExecute
                 if (String.IsNullOrWhiteSpace(script.Code))
                     return resultTable;
 
-                using (var powerShell = PowerShell.Create())
-                {
-                    Environment.CurrentDirectory = @"C:\Temp\";
-                    logger.Warn("************"+ workdir);
-                    var scriptBlock = ScriptBlock.Create(script.Code);
-                    powerShell.AddCommand("Start-Job");
+                Environment.CurrentDirectory = @"C:\Log\";
+                workdir = @"C:\Log\";
+                logger.Warn($"[Test]WorkDir: {workdir}");
 
+                // convert script to json
+                if(script.Code.Contains("ConvertTo-Json"))
+                {
+                    logger.Warn("The command \"ConvertTo-Json\" can not be used.");
+                    return resultTable;
+                }
+
+                var psScript = $"{script.Code.Trim().TrimEnd(';')} | ConvertTo-Json";
+                using (var powerShell = new PowerShellProcess(workdir, psScript, script.Parameters.ToArray()))
+                {
                     if (username != "" && password != "")
                     {
-                        logger.Warn($"TEST: -User:{username} -Pass:{password.Length}");
-                        
-                        // if username & password are defined -> add as credentials
+                        logger.Warn($"[Test]Credentials: -User:{username} -Pass:{password.Length}");
+
+                        // convert to SecureString
                         var secPass = new SecureString();
                         Array.ForEach(password.ToArray(), secPass.AppendChar);
-                        powerShell.AddParameter("Credential", new PSCredential(username, secPass));
+                        powerShell.SetCredentials(username, secPass);
                     }
                     else
                     {
@@ -128,7 +117,7 @@ namespace QlikConnectorPSExecute
                                 logger.Warn("No Certificate file found or no access.");
                                 return resultTable;
                             }
-                                
+
                             if (!Manager.IsValidPublicKey(script.Code, signature))
                             {
                                 logger.Warn("The signature could not be valid.");
@@ -137,51 +126,59 @@ namespace QlikConnectorPSExecute
                         }
                     }
 
-                    powerShell.AddParameter("ScriptBlock", scriptBlock);
+                    // run Powershell script
+                    var result = powerShell.Start();
 
-                    if(script.Parameters.Count > 0)
-                      powerShell.AddParameter("ArgumentList", script.Parameters);
-
-                    // Wait for the Job to finish
-                    powerShell.AddCommand("Wait-Job");
-                    // Give all results and not the jobs back
-                    powerShell.AddCommand("Receive-Job");
-                    
-                    var results = powerShell.Invoke();
-
-                    foreach (var error in powerShell.Streams.Error.ReadAll())
+                    // fill QvxTable
+                    var fields = new List<QvxField>();
+                    var rows = new List<QvxDataRow>();
+                    if (result.Trim().StartsWith("["))
                     {
-                        var exString = PseLogger.GetFullExceptionString(error.Exception);
-                        Errors.Append($"\n{exString}");
-                    }
-                    if (Errors.Length > 0)
-                    {
-                        throw new Exception($"Powershell-Error: {Errors.ToString()}");
-                    }
-
-                    foreach (var psObject in results)
-                    {
-                        var row = resultTable.NewRow();
-                        foreach (var p in psObject.Properties)
+                        var json = JsonConvert.DeserializeObject(result) as JArray;
+                        foreach (var item in json.Children())
                         {
-                            if (p.Name != "PSComputerName" && p.Name != "RunspaceId" && p.Name != "PSShowComputerName")
+                            var row = new QvxDataRow();
+                            foreach (var child in item.Children())
                             {
-                                if (!resultTable.Columns.Contains(p.Name))
-                                {
-                                    resultTable.Columns.Add(p.Name);
-                                }
-                                row[p.Name] = (p.Value ?? "").ToString();
-                            }
-                        }
+                                var property = child as JProperty;
+                                var field = new QvxField(property?.Name, QvxFieldType.QVX_TEXT,
+                                                         QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
+                                                         FieldAttrType.ASCII);
 
-                        resultTable.Rows.Add(row);
+                                if (fields.SingleOrDefault(s =>
+                                    s.FieldName == field.FieldName) == null)
+                                {
+                                    fields.Add(field);
+                                }
+
+                                var value = property?.Value?.ToString();
+                                if (value == null)
+                                    value = property?.ToString();
+
+                                row[field] = value;
+                            }
+
+                            rows.Add(row);
+                        }
                     }
+                    else if(!String.IsNullOrEmpty(result))
+                    {
+                        var field = new QvxField("Result", QvxFieldType.QVX_TEXT,
+                                                         QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
+                                                         FieldAttrType.ASCII);
+                        fields.Add(field);
+                        var row = new QvxDataRow();
+                        row[field] = result;
+                        rows.Add(row);
+                    }
+
+                    resultTable.Fields = fields.ToArray();
+                    resultTable.GetRows = () => { return rows; };
                 }
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "The PowerShell script can not be executed.");
-                resultTable = new DataTable();
             }
             finally
             {
@@ -189,6 +186,17 @@ namespace QlikConnectorPSExecute
             }
 
             return resultTable;
+        }
+
+        public static SecureString GetSecureString(string str)
+        {
+            SecureString secureString = new SecureString();
+            foreach (char ch in str)
+            {
+                secureString.AppendChar(ch);
+            }
+            secureString.MakeReadOnly();
+            return secureString;
         }
 
         public override QvxDataTable ExtractQuery(string query, List<QvxTable> tables)
@@ -207,24 +215,9 @@ namespace QlikConnectorPSExecute
                 password = (password ?? "").Trim();
                 workdir = workdir ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-                internalData = GetData(script, username, password, workdir);
-
-                var fieldsl = new List<QvxField>();
-                foreach (DataColumn column in internalData.Columns)
-                {
-                    fieldsl.Add(new QvxField(column.ColumnName, QvxFieldType.QVX_TEXT, QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA, FieldAttrType.ASCII));
-                }
-                fields = fieldsl.ToArray();
-
-                var table = new QvxTable()
-                {
-                    TableName = script.TableName,
-                    Fields = fields,
-                    GetRows = GetPowerShellResult
-                };
-
-                var result = new QvxDataTable(table);
-                result.Select(fields);
+                var qvxTable = GetData(script, username, password, workdir);
+                var result = new QvxDataTable(qvxTable);
+                result.Select(qvxTable.Fields);
 
                 return result;
             }
