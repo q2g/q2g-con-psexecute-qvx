@@ -69,59 +69,81 @@ namespace QlikConnectorPSExecute
             DSafeHandle = new NoopSafeHandle(GetThreadDesktop(GetCurrentThreadId()));
             DesktopSecurity = new GenericSecurity(false, ResourceType.WindowObject, DSafeHandle, AccessControlSections.Access);
 
+            //Test
+            var ruels1 = GetAccessRules(WindowStationSecurity);
+            var ruels2 = GetAccessRules(DesktopSecurity);
+
+            //RemoveGrantAccess(WindowStationSecurity, windowStationMask, WsSafeHandle);
+            //RemoveGrantAccess(DesktopSecurity, desktopMask, DSafeHandle);
+            //AddGrandAccess(WindowStationSecurity, 983150, WsSafeHandle);
+            //AddGrandAccess(DesktopSecurity, 983150, DSafeHandle);
+
             OldWindowStationMask = ReadAccessMask(WindowStationSecurity, WsSafeHandle, windowStationMask);
             OldDesktopMask = ReadAccessMask(DesktopSecurity, DSafeHandle, desktopMask);
         }
         #endregion
 
         #region Methods
+        private AuthorizationRuleCollection GetAccessRules(GenericSecurity security)
+        {
+            return security.GetAccessRules(true, false, typeof(NTAccount));
+        }
+
         private int? ReadAccessMask(GenericSecurity security, SafeHandle safeHandle, int accessMask)
         {
-            var ruels = security.GetAccessRules(true, false, typeof(NTAccount));
+            var ruels = GetAccessRules(security);
         
             var username = AccountInfo.Value;
             if (!username.Contains("\\"))
                 username = $"{Environment.MachineName}\\{username}";
 
-            var userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value == username && accessMask == r.PublicAccessMask);
+            var userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value.ToLower() == username.ToLower() && accessMask == r.PublicAccessMask);
             if (userResult == null)
             {
-                var rule = new GrantAccessRule(AccountInfo, accessMask, AccessControlType.Allow);
-                security.AddAccessRule(rule);
-                security.Persist(safeHandle, AccessControlSections.Access);
-
-                userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value == username);
+                AddGrandAccess(security, accessMask, safeHandle);
+                userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value.ToLower() == username.ToLower());
                 if (userResult != null)
                 {
                     return userResult.PublicAccessMask;
                 }
             }
+            else
+            {
+                return userResult.PublicAccessMask;
+            }
 
             return null;
         }
 
-        private void RemoveGrantAccess(GenericSecurity security, int accessMask)
+        private void AddGrandAccess(GenericSecurity security, int accessMask, SafeHandle safeHandle)
+        {
+            var rule = new GrantAccessRule(AccountInfo, accessMask, AccessControlType.Allow);
+            security.AddAccessRule(rule);
+            security.Persist(safeHandle, AccessControlSections.Access);
+        }
+
+        private void RemoveGrantAccess(GenericSecurity security, int accessMask, SafeHandle safeHandle)
         {
             var rule = new GrantAccessRule(AccountInfo, accessMask, AccessControlType.Allow);
             security.RemoveAccessRule(rule);
-
-            var ruels = security.GetAccessRules(true, false, typeof(NTAccount));
+            security.Persist(safeHandle, AccessControlSections.Access);
         }
 
-        private void SetAccessMask(GenericSecurity security, int oldAccessMask, int fullAccessMask, SafeHandle safeHandle)
+        private void SetGrandAccess(GenericSecurity security, int accessMask, SafeHandle safeHandle)
         {
-            RemoveGrantAccess(security, fullAccessMask);
-            var rule = new GrantAccessRule(AccountInfo, oldAccessMask, AccessControlType.Allow);
-            security.AddAccessRule(rule);
+            var rule = new GrantAccessRule(AccountInfo, accessMask, AccessControlType.Allow);
+            security.SetAccessRule(rule);
             security.Persist(safeHandle, AccessControlSections.Access);
         }
 
         private void RestAccessMask(int? oldAccessMask, int fullAccessMask, GenericSecurity security, SafeHandle safeHandle)
         {
             if (oldAccessMask == null)
-                RemoveGrantAccess(security, fullAccessMask);
+                RemoveGrantAccess(security, fullAccessMask, safeHandle);
             else if (oldAccessMask != fullAccessMask)
-                SetAccessMask(security, oldAccessMask.Value, fullAccessMask, safeHandle);
+            {
+                SetGrandAccess(security, oldAccessMask.Value, safeHandle);
+            } 
         }
 
         public void Dispose()
@@ -159,6 +181,11 @@ namespace QlikConnectorPSExecute
             new public bool RemoveAccessRule(AccessRule rule)
             {
                 return base.RemoveAccessRule(rule);
+            }
+
+            new public void SetAccessRule(AccessRule rule)
+            {
+                base.SetAccessRule(rule);
             }
 
             new public AuthorizationRuleCollection GetAccessRules(bool includeExplicit, bool includeInherited, Type targetType)

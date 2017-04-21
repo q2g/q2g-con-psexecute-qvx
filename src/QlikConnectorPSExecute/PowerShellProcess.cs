@@ -69,7 +69,7 @@ namespace QlikConnectorPSExecute
                 NTAccount accountInfo = null;
                 if (UseCredentials)
                 {
-                    //accountInfo = new NTAccount(PsProcess.StartInfo.UserName);
+                    accountInfo = new NTAccount(PsProcess.StartInfo.UserName);
                 }
 
                 // If you are running the new process using different credentials, 
