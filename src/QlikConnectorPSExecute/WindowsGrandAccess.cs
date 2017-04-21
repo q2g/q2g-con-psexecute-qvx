@@ -69,15 +69,6 @@ namespace QlikConnectorPSExecute
             DSafeHandle = new NoopSafeHandle(GetThreadDesktop(GetCurrentThreadId()));
             DesktopSecurity = new GenericSecurity(false, ResourceType.WindowObject, DSafeHandle, AccessControlSections.Access);
 
-            //Test
-            var ruels1 = GetAccessRules(WindowStationSecurity);
-            var ruels2 = GetAccessRules(DesktopSecurity);
-
-            //RemoveGrantAccess(WindowStationSecurity, windowStationMask, WsSafeHandle);
-            //RemoveGrantAccess(DesktopSecurity, desktopMask, DSafeHandle);
-            //AddGrandAccess(WindowStationSecurity, 983150, WsSafeHandle);
-            //AddGrandAccess(DesktopSecurity, 983150, DSafeHandle);
-
             OldWindowStationMask = ReadAccessMask(WindowStationSecurity, WsSafeHandle, windowStationMask);
             OldDesktopMask = ReadAccessMask(DesktopSecurity, DSafeHandle, desktopMask);
         }
@@ -92,7 +83,7 @@ namespace QlikConnectorPSExecute
         private int? ReadAccessMask(GenericSecurity security, SafeHandle safeHandle, int accessMask)
         {
             var ruels = GetAccessRules(security);
-        
+
             var username = AccountInfo.Value;
             if (!username.Contains("\\"))
                 username = $"{Environment.MachineName}\\{username}";
@@ -103,14 +94,10 @@ namespace QlikConnectorPSExecute
                 AddGrandAccess(security, accessMask, safeHandle);
                 userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value.ToLower() == username.ToLower());
                 if (userResult != null)
-                {
                     return userResult.PublicAccessMask;
-                }
             }
             else
-            {
-                return userResult.PublicAccessMask;
-            }
+              return userResult.PublicAccessMask;
 
             return null;
         }
