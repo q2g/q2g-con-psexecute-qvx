@@ -112,7 +112,7 @@
     <Compile Include="PSExecuteServer.cs" />
     <Compile Include="PSExecuteConnection.cs" />
     <Compile Include="ScriptCode.cs" />
-    <Compile Include="WindowsAccess.cs" />
+    <Compile Include="WindowsGrandAccess.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>

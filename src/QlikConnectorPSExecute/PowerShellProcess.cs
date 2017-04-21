@@ -1,26 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Principal;
+﻿#region License
+/*
+Copyright (c) 2017 Konrad Mattheis und Martin Berthold
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+#endregion
 
 namespace QlikConnectorPSExecute
 {
+    #region Usings
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Data;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Security;
+    using System.Text;
+    using System.Security.Principal;
+    #endregion
+
     public class PowerShellProcess : IDisposable
     {
+        #region Varibales && Properties
         private StringBuilder OutputResult { get; set; }
         private StringBuilder ErrorResult { get; set; }
         private Process PsProcess { get; set; }
-        private int WindowStationMask { get; set; }
-        private int DesktopMask { get; set; }
+        private bool UseCredentials { get; set; }
+        #endregion
 
         public PowerShellProcess(string workDir, string script, string[] args)
         {
+            UseCredentials = false;
             OutputResult = new StringBuilder();
             ErrorResult = new StringBuilder();
 
@@ -45,36 +57,38 @@ namespace QlikConnectorPSExecute
 
         public void SetCredentials(string username, SecureString password, string machineName = null)
         {
-            // If you are running the new process using different credentials, 
-            // then the new process won't have permissions to access the window station and desktop.
-
-            var accountInfo = new NTAccount(username);
-
-            if (!String.IsNullOrEmpty(machineName))
-                accountInfo = new NTAccount(machineName, username);
-
-            WindowStationMask = WindowsAccess.GrantAccessToWindowStation(accountInfo, WindowsAccess.WindowStationAllAccess);
-            DesktopMask = WindowsAccess.GrantAccessToDesktop(accountInfo, WindowsAccess.DesktopRightsAllAccess);
-
             PsProcess.StartInfo.UserName = username;
             PsProcess.StartInfo.Password = password;
+            UseCredentials = true;
         }
 
         public string Start()
         {
             try
             {
-                PsProcess.Start();
-                PsProcess.BeginOutputReadLine();
-                PsProcess.BeginErrorReadLine();
-                
-                PsProcess.WaitForExit();            
+                NTAccount accountInfo = null;
+                if (UseCredentials)
+                {
+                    //accountInfo = new NTAccount(PsProcess.StartInfo.UserName);
+                }
 
-                var error = ErrorResult.ToString();
-                if (error.Length > 0)
-                    throw new Exception(error);
+                // If you are running the new process using different credentials, 
+                // then the new process won't have permissions to access the window station and desktop.
+                using (var windowsAccess = new WindowsGrandAccess(accountInfo, WindowsGrandAccess.WindowStationAllAccess,
+                                                                  WindowsGrandAccess.DesktopRightsAllAccess))
+                {
+                    PsProcess.Start();
+                    PsProcess.BeginOutputReadLine();
+                    PsProcess.BeginErrorReadLine();
 
-                return OutputResult.ToString();
+                    PsProcess.WaitForExit();
+
+                    var error = ErrorResult.ToString();
+                    if (error.Length > 0)
+                        throw new Exception(error);
+
+                    return OutputResult.ToString();
+                }
             }
             catch (Win32Exception ex)
             {
@@ -83,12 +97,6 @@ namespace QlikConnectorPSExecute
             catch (Exception ex)
             {
                 throw new Exception("The Process has an error.", ex);
-            }
-            finally
-            {
-                var accountInfo = new NTAccount(PsProcess.StartInfo.UserName);
-                WindowsAccess.GrantAccessToWindowStation(accountInfo, WindowStationMask);
-                WindowsAccess.GrantAccessToDesktop(accountInfo, DesktopMask);
             }
         }
 
