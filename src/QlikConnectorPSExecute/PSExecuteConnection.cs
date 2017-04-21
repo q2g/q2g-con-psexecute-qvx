@@ -76,8 +76,6 @@ namespace QlikConnectorPSExecute
 
             try
             {
-                Thread.Sleep(10000);
-
                 var Errors = new StringBuilder();
 
                 if (String.IsNullOrWhiteSpace(script.Code))
@@ -85,17 +83,12 @@ namespace QlikConnectorPSExecute
 
                 using (var powerShell = PowerShell.Create())
                 {
-                    //Environment.CurrentDirectory = @"C:\Log\";
-                    logger.Warn("[TEST]Workdir: " + workdir);
-
                     var scriptBlock = ScriptBlock.Create(script.Code);
                     powerShell.AddCommand("Start-Job");
 
                     NTAccount accountInfo = null;
                     if (username != "" && password != "")
                     {
-                        logger.Warn($"[Test]Credentials: -User:{username} -Pass:{password.Length}");
-
                         // if username & password are defined -> add as credentials
                         var secPass = new SecureString();
                         Array.ForEach(password.ToArray(), secPass.AppendChar);
