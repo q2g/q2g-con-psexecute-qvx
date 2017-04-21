@@ -7,6 +7,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+//Mask nicht neu setzen unterschiede, noch zu beachten!!!
+
 namespace QlikConnectorPSExecute
 {
     #region Usings
@@ -72,11 +74,10 @@ namespace QlikConnectorPSExecute
             var resultTable = new QvxTable();
             resultTable.TableName = script.TableName;
 
-            //Debugging
-            //Thread.Sleep(10000);
-
             try
             {
+                Thread.Sleep(10000);
+
                 var Errors = new StringBuilder();
 
                 if (String.IsNullOrWhiteSpace(script.Code))
@@ -84,7 +85,7 @@ namespace QlikConnectorPSExecute
 
                 using (var powerShell = PowerShell.Create())
                 {
-                    Environment.CurrentDirectory = @"C:\Log\";
+                    //Environment.CurrentDirectory = @"C:\Log\";
                     logger.Warn("[TEST]Workdir: " + workdir);
 
                     var scriptBlock = ScriptBlock.Create(script.Code);
@@ -206,7 +207,7 @@ namespace QlikConnectorPSExecute
                 this.MParameters.TryGetValue("workdir", out workdir);
                 username = (username ?? "").Trim();
                 password = (password ?? "").Trim();
-                workdir = workdir ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                workdir = workdir ?? Path.GetDirectoryName(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
                 var qvxTable = GetData(script, username, password, workdir);
                 var result = new QvxDataTable(qvxTable);

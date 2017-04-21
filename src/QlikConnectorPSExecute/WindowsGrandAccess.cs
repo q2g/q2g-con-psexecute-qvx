@@ -18,8 +18,6 @@ namespace QlikConnectorPSExecute
     using System.Security.Principal;
     #endregion
 
-    //Mask nicht neu setzen unterschiede, noch zu beachten!!!
-
     //inspired by: http://stackoverflow.com/questions/677874/starting-a-process-with-credentials-from-a-windows-service
     public class WindowsGrandAccess : IDisposable
     {
