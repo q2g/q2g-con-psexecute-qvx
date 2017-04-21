@@ -72,7 +72,8 @@ namespace QlikConnectorPSExecute
             var resultTable = new QvxTable();
             resultTable.TableName = script.TableName;
 
-            Thread.Sleep(10000);
+            //Debugging
+            //Thread.Sleep(10000);
 
             try
             {

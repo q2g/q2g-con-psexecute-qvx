@@ -60,9 +60,14 @@ namespace QlikConnectorPSExecute
         #region Constructor
         public WindowsGrandAccess(NTAccount accountInfo, int windowStationMask, int desktopMask)
         {
-            if (accountInfo == null)
-               return;
+            if (accountInfo != null)
+                Init(accountInfo, windowStationMask, desktopMask);
+        }
+        #endregion
 
+        #region Methods
+        private void Init(NTAccount accountInfo, int windowStationMask, int desktopMask)
+        {
             AccountInfo = accountInfo;
 
             WsSafeHandle = new NoopSafeHandle(GetProcessWindowStation());
@@ -74,9 +79,7 @@ namespace QlikConnectorPSExecute
             OldWindowStationMask = ReadAccessMask(WindowStationSecurity, WsSafeHandle, windowStationMask);
             OldDesktopMask = ReadAccessMask(DesktopSecurity, DSafeHandle, desktopMask);
         }
-        #endregion
 
-        #region Methods
         private AuthorizationRuleCollection GetAccessRules(GenericSecurity security)
         {
             return security.GetAccessRules(true, false, typeof(NTAccount));
@@ -139,6 +142,9 @@ namespace QlikConnectorPSExecute
         {
             try
             {
+                if (AccountInfo == null)
+                    return;
+
                 RestAccessMask(OldWindowStationMask, WindowStationAllAccess, WindowStationSecurity, WsSafeHandle);
                 RestAccessMask(OldDesktopMask, DesktopRightsAllAccess, DesktopSecurity, DSafeHandle);
             }
