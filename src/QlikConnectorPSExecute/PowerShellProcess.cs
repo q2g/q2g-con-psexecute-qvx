@@ -72,7 +72,7 @@ namespace QlikConnectorPSExecute
                     accountInfo = new NTAccount(PsProcess.StartInfo.UserName);
                 }
 
-                // If you are running the new process using different credentials, 
+                // If you are running the new process using different credentials,
                 // then the new process won't have permissions to access the window station and desktop.
                 using (var windowsAccess = new WindowsGrandAccess(accountInfo, WindowsGrandAccess.WindowStationAllAccess,
                                                                   WindowsGrandAccess.DesktopRightsAllAccess))
@@ -116,7 +116,7 @@ namespace QlikConnectorPSExecute
         private void PsProcess_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             try
-            {                
+            {
                 ErrorResult.Append(e.Data);
             }
             catch (Exception ex)
@@ -128,7 +128,7 @@ namespace QlikConnectorPSExecute
         private void PsProcess_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             try
-            {                
+            {
                 OutputResult.Append(e.Data);
             }
             catch (Exception ex)
