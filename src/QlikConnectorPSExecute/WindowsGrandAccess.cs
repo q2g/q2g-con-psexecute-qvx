@@ -18,6 +18,8 @@ namespace QlikConnectorPSExecute
     using System.Security.Principal;
     #endregion
 
+    // ToDo: Mask nicht neu setzen unterschiede, noch zu beachten!!!
+
     //inspired by: http://stackoverflow.com/questions/677874/starting-a-process-with-credentials-from-a-windows-service
     public class WindowsGrandAccess : IDisposable
     {
@@ -55,11 +57,27 @@ namespace QlikConnectorPSExecute
         private SafeHandle DSafeHandle { get; set; }
         #endregion
 
-        #region Constructor
+        #region Constructor & Dispose
         public WindowsGrandAccess(NTAccount accountInfo, int windowStationMask, int desktopMask)
         {
             if (accountInfo != null)
                 Init(accountInfo, windowStationMask, desktopMask);
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                if (AccountInfo == null)
+                    return;
+
+                RestAccessMask(OldWindowStationMask, WindowStationAllAccess, WindowStationSecurity, WsSafeHandle);
+                RestAccessMask(OldDesktopMask, DesktopRightsAllAccess, DesktopSecurity, DSafeHandle);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"The object \"{nameof(WindowsGrandAccess)}\" could not be dispose.", ex);
+            }
         }
         #endregion
 
@@ -133,22 +151,6 @@ namespace QlikConnectorPSExecute
             else if (oldAccessMask != fullAccessMask)
             {
                 SetGrandAccess(security, oldAccessMask.Value, safeHandle);
-            } 
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                if (AccountInfo == null)
-                    return;
-
-                RestAccessMask(OldWindowStationMask, WindowStationAllAccess, WindowStationSecurity, WsSafeHandle);
-                RestAccessMask(OldDesktopMask, DesktopRightsAllAccess, DesktopSecurity, DSafeHandle);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"The object \"{nameof(WindowsGrandAccess)}\" could not be dispose.", ex);
             }
         }
         #endregion
