@@ -20,7 +20,7 @@ namespace QlikConnectorPSExecute
         private static PseLogger logger = PseLogger.CreateLogger();
         #endregion
 
-        #region Methods      
+        #region Methods
         public override QvxConnection CreateConnection()
         {
             try
@@ -55,6 +55,9 @@ namespace QlikConnectorPSExecute
 
                 switch (method)
                 {
+                    case "getVersion":
+                        response = new Info { qMessage = GitVersionInformation.InformationalVersion };
+                        break;
                     default:
                         response = new Info { qMessage = "Unknown command" };
                         break;

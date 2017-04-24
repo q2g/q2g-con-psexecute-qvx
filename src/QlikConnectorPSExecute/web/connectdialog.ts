@@ -15,6 +15,7 @@ class ConnectDialog {
     isEdit: boolean;
     provider: string = "QlikConnectorPSExecute.exe";
     connectionInfo: string;
+    version: string = "";
 
     input: any;
     scope: any;
@@ -50,6 +51,13 @@ class ConnectDialog {
                 this.name = result.qConnection.qName;
             });
         }
+
+        input.serverside.sendJsonRequest("getVersion").then((info) => {
+            try {
+                this.version = (info.qMessage as String).replace(".Sha.", " Sha.");
+            } catch (e) {
+            }
+        });
     }
 
     public onOKClicked(): void {

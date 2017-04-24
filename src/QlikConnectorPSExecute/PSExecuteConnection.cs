@@ -65,6 +65,7 @@ namespace QlikConnectorPSExecute
         }
         #endregion
 
+
         #region Methods
         private QvxTable GetData(ScriptCode script, string username, string password, string workdir)
         {
