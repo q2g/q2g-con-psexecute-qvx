@@ -81,8 +81,8 @@ namespace QlikConnectorPSExecute
                 var sig = Convert.FromBase64String(sign);
                 ISigner signer = SignerUtilities.GetSigner(algorithm);
                 signer.Init(false, PublicKey);
-
-                var msgBytes = Encoding.Default.GetBytes(data);
+                
+                var msgBytes = Encoding.UTF8.GetBytes(data);
                 signer.BlockUpdate(msgBytes, 0, msgBytes.Length);
                 return signer.VerifySignature(sig);
             }
@@ -112,7 +112,7 @@ namespace QlikConnectorPSExecute
             rsa.ImportParameters(rsaParameters);
 
             var sha = new SHA256CryptoServiceProvider();
-            var hash = sha.ComputeHash(Encoding.ASCII.GetBytes(data));
+            var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(data));
             var id = CryptoConfig.MapNameToOID(algorithm);
             var sig = rsa.SignHash(hash, id);
 
