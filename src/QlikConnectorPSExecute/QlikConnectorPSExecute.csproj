@@ -113,6 +113,7 @@
     <Compile Include="PSExecuteServer.cs" />
     <Compile Include="PSExecuteConnection.cs" />
     <Compile Include="ScriptCode.cs" />
+    <Compile Include="UserInteractive.cs" />
     <Compile Include="WindowsGrandAccess.cs" />
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
@@ -219,14 +220,13 @@
   </Target>
   <Target Name="AfterBuild">
     <Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
-    <Exec Command="$(ProjectDir)lib\verpatch.exe &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;PS Execute Connector&quot;" />
-    <Exec Command="$(ProjectDir)lib\verpatch.exe &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;PS Execute Connector&quot;" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
     <!--
     
-    -->  	
+    -->
     <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
     <CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />
-    
   </Target>
   <Target Name="DebugCopy">
     <PropertyGroup>

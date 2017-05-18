@@ -107,7 +107,7 @@ namespace QlikConnectorPSExecute
 
             var username = AccountInfo.Value;
             if (!username.Contains("\\"))
-                username = $"{Environment.MachineName}\\{username}";
+                username = $"{Environment.UserDomainName}\\{username}";
 
             var userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value.ToLower() == username.ToLower() && accessMask == r.PublicAccessMask);
             if (userResult == null)
