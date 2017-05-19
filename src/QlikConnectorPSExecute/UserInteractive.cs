@@ -116,97 +116,10 @@ namespace QlikConnectorPSExecute
         #endregion
 
         #region Methods
-        public IList<string> GetRights(string accountName)
+        private void LookupAccount(string accountName, ref IntPtr sid, ref IntPtr policyHandle)
         {
-            var rights = new List<string>();
-            var errorMessage = String.Empty;
-
-            long winErrorCode = 0;
-            var sid = IntPtr.Zero;
             int sidSize = 0;
             var domainName = new StringBuilder();
-            int nameSize = 0;
-            int accountType = 0;
-
-            LookupAccountName(string.Empty, accountName, sid, ref sidSize, domainName, ref nameSize, ref accountType);
-
-            domainName = new StringBuilder(nameSize);
-            sid = Marshal.AllocHGlobal(sidSize);
-
-            if (!LookupAccountName(string.Empty, accountName, sid, ref sidSize, domainName, ref nameSize, ref accountType))
-            {
-                winErrorCode = GetLastError();
-                errorMessage = ($"LookupAccountName failed: {winErrorCode}");
-                throw new Win32Exception((int)winErrorCode, errorMessage);
-            }
-            else
-            {
-                var systemName = new LSA_UNICODE_STRING();
-
-                var policyHandle = IntPtr.Zero;
-                var userRightsPtr = IntPtr.Zero;
-                int countOfRights = 0;
-
-                var objectAttributes = CreateLSAObject();
-
-                uint policyStatus = LsaOpenPolicy(ref systemName, ref objectAttributes, Access, out policyHandle);
-                winErrorCode = LsaNtStatusToWinError(policyStatus);
-
-                if (winErrorCode != 0)
-                {
-                    errorMessage = ($"OpenPolicy failed: {winErrorCode}.");
-                    throw new Win32Exception((int)winErrorCode, errorMessage);
-                }
-                else
-                {
-                    try
-                    {
-                        uint result = LsaEnumerateAccountRights(policyHandle, sid, out userRightsPtr, out countOfRights);
-                        winErrorCode = LsaNtStatusToWinError(result);
-                        if (winErrorCode != 0)
-                        {
-                            if (winErrorCode == 2)
-                                return new List<string>();
-
-                            errorMessage = string.Format("LsaEnumerateAccountRights failed: {0}", winErrorCode);
-                            throw new Win32Exception((int)winErrorCode, errorMessage);
-                        }
-
-                        var newPtr = IntPtr.Zero;
-                        if (IntPtr.Size == 8)
-                            newPtr = new IntPtr(userRightsPtr.ToInt64());
-                        else
-                            newPtr = new IntPtr(userRightsPtr.ToInt32());
-
-                        LSA_UNICODE_STRING userRight;
-
-                        int ptr = 0;
-                        for (int i = 0; i < countOfRights; i++)
-                        {
-                            userRight = (LSA_UNICODE_STRING)Marshal.PtrToStructure(newPtr, typeof(LSA_UNICODE_STRING));
-                            var userRightStr = Marshal.PtrToStringAuto(userRight.Buffer);
-                            rights.Add(userRightStr);
-                            ptr += Marshal.SizeOf(userRight);
-                        }
-                    }
-                    finally
-                    {
-                        LsaClose(policyHandle);
-                    }
-                }
-                FreeSid(sid);
-            }
-            return rights;
-        }
-
-        public void SetRight(string accountName, string privilegeName, bool remove)
-        {
-            long winErrorCode = 0;
-            string errorMessage = string.Empty;
-
-            IntPtr sid = IntPtr.Zero;
-            int sidSize = 0;
-            StringBuilder domainName = new StringBuilder();
             int nameSize = 0;
             int accountType = 0;
 
@@ -215,58 +128,107 @@ namespace QlikConnectorPSExecute
             domainName = new StringBuilder(nameSize);
             sid = Marshal.AllocHGlobal(sidSize);
 
-            if (!LookupAccountName(string.Empty, accountName, sid, ref sidSize, domainName, ref nameSize, ref accountType))
+            if (!LookupAccountName(String.Empty, accountName, sid, ref sidSize, domainName, ref nameSize, ref accountType))
             {
-                throw new Win32Exception((int)GetLastError(), $"LookupAccountName failed: {winErrorCode}");
+                var winErrorCode = (int)GetLastError();
+                throw new Win32Exception(winErrorCode, $"LookupAccountName failed: {winErrorCode}");
             }
             else
             {
                 var systemName = new LSA_UNICODE_STRING();
-                var policyHandle = IntPtr.Zero;
                 var objectAttributes = CreateLSAObject();
 
                 uint resultPolicy = LsaOpenPolicy(ref systemName, ref objectAttributes, Access, out policyHandle);
-                winErrorCode = LsaNtStatusToWinError(resultPolicy);
-
+                var winErrorCode = LsaNtStatusToWinError(resultPolicy);
                 if (winErrorCode != 0)
-                   throw new Win32Exception((int)winErrorCode, $"OpenPolicy failed: {winErrorCode}");
-                else
+                    throw new Win32Exception((int)winErrorCode, $"OpenPolicy failed: {winErrorCode}");
+            }
+        }
+
+        public IList<string> GetRights(string accountName)
+        {
+            var sid = IntPtr.Zero;
+            var policyHandle = IntPtr.Zero;
+            var rights = new List<string>();
+            var userRightsPtr = IntPtr.Zero;
+            int countOfRights = 0;
+
+            LookupAccount(accountName, ref sid, ref policyHandle);
+
+            try
+            {
+                uint result = LsaEnumerateAccountRights(policyHandle, sid, out userRightsPtr, out countOfRights);
+                var winErrorCode = LsaNtStatusToWinError(result);
+                if (winErrorCode != 0)
                 {
-                    try
-                    {
-                        var userRights = new LSA_UNICODE_STRING[1];
-                        userRights[0] = new LSA_UNICODE_STRING();
-                        userRights[0].Buffer = Marshal.StringToHGlobalUni(privilegeName);
-                        userRights[0].Length = (UInt16)(privilegeName.Length * UnicodeEncoding.CharSize);
-                        userRights[0].MaximumLength = (UInt16)((privilegeName.Length + 1) * UnicodeEncoding.CharSize);
+                    if (winErrorCode == 2)
+                        return new List<string>();
 
-                        uint res = 0;
-                        if (remove)
-                            res = LsaRemoveAccountRights(policyHandle, sid, false, userRights, 1);
-                        else
-                            res = LsaAddAccountRights(policyHandle, sid, userRights, 1);
-
-                        winErrorCode = LsaNtStatusToWinError(res);
-                        if (winErrorCode != 0)
-                        {
-                            errorMessage = $"LsaAddAccountRights failed: {winErrorCode}";
-                            throw new Win32Exception((int)winErrorCode, errorMessage);
-                        }
-                    }
-                    finally
-                    {
-                        LsaClose(policyHandle);
-                    }
+                    throw new Win32Exception((int)winErrorCode, $"LsaEnumerateAccountRights failed: {winErrorCode}");
                 }
+
+                var newPtr = new IntPtr(userRightsPtr.ToInt32());
+                if (IntPtr.Size == 8)
+                    newPtr = new IntPtr(userRightsPtr.ToInt64());
+               
+                LSA_UNICODE_STRING userRight;
+
+                int ptr = 0;
+                for (int i = 0; i < countOfRights; i++)
+                {
+                    userRight = Marshal.PtrToStructure<LSA_UNICODE_STRING>(newPtr);
+                    var userRightStr = Marshal.PtrToStringAuto(userRight.Buffer);
+                    rights.Add(userRightStr);
+                    ptr += Marshal.SizeOf(userRight);
+                }
+            }
+            finally
+            {
+                LsaClose(policyHandle);
+                FreeSid(sid);
+            }
+
+            return rights;
+        }
+
+        public void SetRight(string accountName, string privilegeName, bool remove)
+        {
+            var sid = IntPtr.Zero;
+            var policyHandle = IntPtr.Zero;
+
+            LookupAccount(accountName, ref sid, ref policyHandle);
+
+            try
+            {
+                var userRights = new LSA_UNICODE_STRING[1];
+                userRights[0] = new LSA_UNICODE_STRING();
+                userRights[0].Buffer = Marshal.StringToHGlobalUni(privilegeName);
+                userRights[0].Length = (UInt16)(privilegeName.Length * UnicodeEncoding.CharSize);
+                userRights[0].MaximumLength = (UInt16)((privilegeName.Length + 1) * UnicodeEncoding.CharSize);
+
+                uint res = 0;
+                if (remove)
+                    res = LsaRemoveAccountRights(policyHandle, sid, false, userRights, 1);
+                else
+                    res = LsaAddAccountRights(policyHandle, sid, userRights, 1);
+
+                var winErrorCode = LsaNtStatusToWinError(res);
+                if (winErrorCode != 0)
+                    throw new Win32Exception((int)winErrorCode, $"LsaAddAccountRights failed: {winErrorCode}");
+            }
+            finally
+            {
+                LsaClose(policyHandle);
                 FreeSid(sid);
             }
         }
+        #endregion 
     }
-    #endregion
 
     // Local security rights managed by the Local Security Authority
     public class LocalSecurityAuthorityRights
     {
+        #region Constants
         // Log on as a service right
         public const string LogonAsService = "SeServiceLogonRight";
         // Log on as a batch job right
@@ -277,33 +239,35 @@ namespace QlikConnectorPSExecute
         public const string NetworkLogon = "SeNetworkLogonRight";
         // Generate security audit logs right
         public const string GenerateSecurityAudits = "SeAuditPrivilege";
+        #endregion
     }
 
     /* added wrapper for PowerShell */
     public class InteractiveUser : IDisposable
     {
         #region Variables & Properties
-        private static bool IsLocallyDomainUser { get; set; }
-        private static bool IsLocalUser { get; set; }
-        private static NTAccount AccountInfo { get; set; }
-        private static string CurrentRight { get; set; }
+        private bool IsLocallyDomainUser { get; set; }
+        private bool IsLocalUser { get; set; }
+        private NTAccount AccountInfo { get; set; }
+        private string CurrentRight { get; set; }
+        private LocalSecurityAuthorityController Controller = new LocalSecurityAuthorityController();
         #endregion
 
         #region Constructor
         public InteractiveUser(NTAccount accountInfo)
         {
-            if(String.IsNullOrEmpty(CurrentRight))
-              CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
+            if (String.IsNullOrEmpty(CurrentRight))
+                CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
 
             AccountInfo = accountInfo;
 
             IsLocalUser = IsLocalWinUser();
             if (!IsLocalUser)
             {
-                var results = GetRights();
+                var results = Controller.GetRights(AccountInfo.Value);
                 if (!results.Contains(CurrentRight))
                 {
-                    AddRight(CurrentRight);
+                    Controller.SetRight(AccountInfo.Value, CurrentRight, false);
                     IsLocallyDomainUser = false;
                 }
                 else
@@ -313,34 +277,19 @@ namespace QlikConnectorPSExecute
 
         public void Dispose()
         {
-            if(!IsLocallyDomainUser && !IsLocalUser)
+            if (!IsLocallyDomainUser && !IsLocalUser)
             {
-                RemoveRight(CurrentRight);
+                Controller.SetRight(AccountInfo.Value, CurrentRight, true);
             }
         }
         #endregion
 
         #region Static Methods
-        private static bool IsLocalWinUser()
+        private bool IsLocalWinUser()
         {
             string strMachineName = System.Environment.MachineName;
             return WindowsIdentity.GetCurrent().Name.ToUpper().Contains(strMachineName.ToUpper());
-        }
-
-        private static IList<string> GetRights()
-        {
-            return new LocalSecurityAuthorityController().GetRights(AccountInfo.Value);
-        }
-
-        private static void AddRight(string privilegeName)
-        {
-            new LocalSecurityAuthorityController().SetRight(AccountInfo.Value, privilegeName, false);
-        }
-
-        private static void RemoveRight(string privilegeName)
-        {
-            new LocalSecurityAuthorityController().SetRight(AccountInfo.Value, privilegeName, true);
-        }
+        }       
         #endregion
     }
 }
