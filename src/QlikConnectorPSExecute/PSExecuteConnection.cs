@@ -65,7 +65,6 @@ namespace QlikConnectorPSExecute
         }
         #endregion
 
-
         #region Methods
         private QvxTable GetData(ScriptCode script, string username, string password, string workdir)
         {
@@ -75,15 +74,16 @@ namespace QlikConnectorPSExecute
                 workdir = Path.GetDirectoryName(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
             if (Directory.Exists(workdir))
+            {
                 try
                 {
                     Environment.CurrentDirectory = workdir;
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex,"");
+                    logger.Error(ex, $"The working dir \"{workdir}\" not set.");
                 }
-
+            }
 
             var resultTable = new QvxTable();
             resultTable.TableName = script.TableName;
@@ -143,47 +143,50 @@ namespace QlikConnectorPSExecute
                                                         WindowsGrandAccess.WindowStationAllAccess,
                                                         WindowsGrandAccess.DesktopRightsAllAccess))
                     {
-                        var results = powerShell.Invoke();
+                        using (var interactiveUser = new InteractiveUser(accountInfo))
+                        {
+                            var results = powerShell.Invoke();
 
-                        foreach (var error in powerShell.Streams.Error.ReadAll())
-                        {
-                            var exString = PseLogger.GetFullExceptionString(error.Exception);
-                            Errors.Append($"\n{exString}");
-                        }
-                        if (Errors.Length > 0)
-                        {
-                            throw new Exception($"Powershell-Error: {Errors.ToString()}");
-                        }
-
-                        // fill QvxTable
-                        var fields = new List<QvxField>();
-                        var rows = new List<QvxDataRow>();
-                        foreach (var psObject in results)
-                        {
-                            var row = new QvxDataRow();
-                            foreach (var p in psObject.Properties)
+                            foreach (var error in powerShell.Streams.Error.ReadAll())
                             {
-                                if (p.Name != "PSComputerName" && p.Name != "RunspaceId" && p.Name != "PSShowComputerName")
-                                {
-                                    var field = new QvxField(p.Name, QvxFieldType.QVX_TEXT,
-                                                         QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
-                                                         FieldAttrType.ASCII);
-
-                                    if (fields.SingleOrDefault(s =>
-                                        s.FieldName == field.FieldName) == null)
-                                    {
-                                        fields.Add(field);
-                                    }
-
-                                    row[field] = (p.Value ?? "").ToString();
-                                }
+                                var exString = PseLogger.GetFullExceptionString(error.Exception);
+                                Errors.Append($"\n{exString}");
+                            }
+                            if (Errors.Length > 0)
+                            {
+                                throw new Exception($"Powershell-Error: {Errors.ToString()}");
                             }
 
-                            rows.Add(row);
-                        }
+                            // fill QvxTable
+                            var fields = new List<QvxField>();
+                            var rows = new List<QvxDataRow>();
+                            foreach (var psObject in results)
+                            {
+                                var row = new QvxDataRow();
+                                foreach (var p in psObject.Properties)
+                                {
+                                    if (p.Name != "PSComputerName" && p.Name != "RunspaceId" && p.Name != "PSShowComputerName")
+                                    {
+                                        var field = new QvxField(p.Name, QvxFieldType.QVX_TEXT,
+                                                             QvxNullRepresentation.QVX_NULL_FLAG_SUPPRESS_DATA,
+                                                             FieldAttrType.ASCII);
 
-                        resultTable.Fields = fields.ToArray();
-                        resultTable.GetRows = () => { return rows; };
+                                        if (fields.SingleOrDefault(s =>
+                                            s.FieldName == field.FieldName) == null)
+                                        {
+                                            fields.Add(field);
+                                        }
+
+                                        row[field] = (p.Value ?? "").ToString();
+                                    }
+                                }
+
+                                rows.Add(row);
+                            }
+
+                            resultTable.Fields = fields.ToArray();
+                            resultTable.GetRows = () => { return rows; };
+                        }
                     }
                 }
             }
