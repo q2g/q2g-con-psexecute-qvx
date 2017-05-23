@@ -23,6 +23,7 @@ namespace QlikConnectorPSExecute
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Threading;
     using System.Security.Principal;
+    using System.DirectoryServices.AccountManagement;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
@@ -66,9 +67,24 @@ namespace QlikConnectorPSExecute
         #endregion
 
         #region Methods
-        private QvxTable GetData(ScriptCode script, string username, string password, string workdir)
+        private bool IsRemoteComputer(string remoteName)
+        {
+            switch ((remoteName ?? "").ToLowerInvariant())
+            {
+                case "":                  
+                case "localhost":
+                case "127.0.0.1":
+                case ":::1":
+                    return false;                
+                default:
+                    return true;
+            }
+        }
+
+        private QvxTable GetData(ScriptCode script, string username, string password, string workdir, string remoteName)
         {
             var actualWorkDir = Environment.CurrentDirectory;
+            var useRemote = IsRemoteComputer(remoteName);
 
             if (String.IsNullOrWhiteSpace(workdir))
                 workdir = Path.GetDirectoryName(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
@@ -98,7 +114,10 @@ namespace QlikConnectorPSExecute
                 using (var powerShell = PowerShell.Create())
                 {
                     var scriptBlock = ScriptBlock.Create(script.Code);
-                    powerShell.AddCommand("Start-Job");
+                    if (useRemote)
+                        powerShell.AddCommand("Invoke-Command");
+                    else
+                        powerShell.AddCommand("Start-Job");
 
                     NTAccount accountInfo = null;
                     if (username != "" && password != "")
@@ -111,9 +130,15 @@ namespace QlikConnectorPSExecute
                     }
                     else
                     {
+                        if (useRemote == true)
+                        {
+                            logger.Warn("A remote connection without user credentials is not allowed.");
+                            return resultTable;
+                        }
+                            
                         if (!IsQlikDesktopApp)
                         {
-                            // without check signature
+                            // check signature
                             var signature = script.GetSignature();
                             if (Manager == null)
                             {
@@ -134,12 +159,17 @@ namespace QlikConnectorPSExecute
                     if (script.Parameters.Count > 0)
                         powerShell.AddParameter("ArgumentList", script.Parameters);
 
-                    // Wait for the Job to finish
-                    powerShell.AddCommand("Wait-Job");
-                    // Give all results and not the jobs back
-                    powerShell.AddCommand("Receive-Job");
+                    if (useRemote)
+                        powerShell.AddParameter("ComputerName", remoteName);
+                    else
+                    {
+                        // Wait for the Job to finish
+                        powerShell.AddCommand("Wait-Job");
+                        // Give all results and not the jobs back
+                        powerShell.AddCommand("Receive-Job");
+                    }
 
-                    using (var windowsGrandAccess = new WindowsGrandAccess(accountInfo,
+                    using (var windowsGrandAccess = new WindowsGrandAccess(accountInfo, useRemote,
                                                         WindowsGrandAccess.WindowStationAllAccess,
                                                         WindowsGrandAccess.DesktopRightsAllAccess))
                     {
@@ -212,14 +242,17 @@ namespace QlikConnectorPSExecute
                 var username = "";
                 var password = "";
                 var workdir = "";
+                var hostName = "";
                 this.MParameters.TryGetValue("userid", out username);
                 this.MParameters.TryGetValue("password", out password);
                 this.MParameters.TryGetValue("workdir", out workdir);
+                this.MParameters.TryGetValue("host", out hostName);
                 username = (username ?? "").Trim();
                 password = (password ?? "").Trim();
                 workdir = (workdir ?? "").Trim();
+                hostName = (hostName ?? "").Trim();
 
-                var qvxTable = GetData(script, username, password, workdir);
+                var qvxTable = GetData(script, username, password, workdir, hostName);
                 var result = new QvxDataTable(qvxTable);
                 result.Select(qvxTable.Fields);
 

@@ -12,6 +12,7 @@ class ConnectDialog {
     name: string="";
     username: string;
     password: string;
+    host: string="";
     isEdit: boolean;
     provider: string = "QlikConnectorPSExecute.exe";
     connectionInfo: string;
@@ -30,8 +31,10 @@ class ConnectDialog {
         }
     }
 
-    get connectionString(): string {
-        return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=localhost;" + "\"";
+    private connectionString(host: string): string {
+        if (!host)
+            host = "localhost";
+        return "CUSTOM CONNECT TO " + "\"provider=" + this.provider + ";" + "host=" + host + ";" + "\"";
     }
 
     get titleText(): string {
@@ -43,12 +46,19 @@ class ConnectDialog {
     }
 
     constructor(input: any, scope: any) {
+        console.log("input", input);
         this.isEdit = input.editMode;
         this.scope = scope;
         this.input = input;
         if (this.isEdit) {
             input.serverside.getConnection(input.instanceId).then((result)=> {
                 this.name = result.qConnection.qName;
+                let connStr: string = result.qConnection.qConnectionString;
+                let list = connStr.match("host=([^;]*);");
+                if (list.length == 2)
+                    this.host = list[1];
+                else
+                    this.host = "";
             });
         }
 
@@ -66,13 +76,15 @@ class ConnectDialog {
         } else {
             if (this.isEdit) {
                 var overrideCredentials = this.username !== "" && this.password !== "";
-                this.input.serverside.modifyConnection(this.input.instanceId,
+                this.input.serverside.modifyConnection(
+                    this.input.instanceId,
                     this.name,
-                    this.connectionString,
+                    this.connectionString(this.host),
                     this.provider,
                     overrideCredentials,
                     this.username,
-                    this.password).then((result) => {
+                    this.password
+                ).then((result) => {
                         if (result) {
                             this.destroyComponent();
                         }
@@ -84,7 +96,7 @@ class ConnectDialog {
                     if (typeof this.password === "undefined")
                         this.password = "";
 
-                    this.input.serverside.createNewConnection(this.name, this.connectionString, this.username, this.password);
+                    this.input.serverside.createNewConnection(this.name, this.connectionString(this.host), this.username, this.password);
                     this.destroyComponent();
                 }
             }
