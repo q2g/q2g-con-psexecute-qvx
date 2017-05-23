@@ -1,6 +1,6 @@
-# Setup a Domain User for Powershell
+# Setup Powershell remoting
 
-## Allowing PowerShell Remoting for standard users with Group Policy
+## Allowing PowerShell remoting for standard users with group policy
 
 1. Open the "Active Directory User and Computer"
 2. Select the user to be allowed for Powershell Remoting.
@@ -8,9 +8,9 @@
 4. Select the "Member of" tab and click the button "Add".
 5. Find the "Remote Management Users" and click "OK".
 
-## Allowing PowerShell Remoting
+## Allowing PowerShell remoting
 
-1. Open a Powershell Window and write following command to enable the remoting.
+1. Open a powershell window and write following command to enable the remoting.
 ```
 Enable-PSRemoting -Force
 ```
