@@ -203,6 +203,7 @@ namespace QlikConnectorPSExecute
                     {
                         using (var interactiveUser = new InteractiveUser(accountInfo))
                         {
+                            // Run PowerShell
                             var results = powerShell.Invoke();
 
                             foreach (var error in powerShell.Streams.Error.ReadAll())
