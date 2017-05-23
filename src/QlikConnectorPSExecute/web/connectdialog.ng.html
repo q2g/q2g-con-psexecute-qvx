@@ -7,7 +7,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 <div class="qvpsexecuteconnectdialogcontainer">
     <div class="lui-modal-background"></div>
     <div class="qvpsexecuteconnectdialog" qv-global-escape="vm.onEscape()">
-        <div class="lui-dialog" style="width: 400px; height:400px">
+        <div class="lui-dialog" style="width: 400px; height:100%">
             <div class="lui-dialog__header">
                 <div class="lui-dialog__title">{{vm.titleText}}</div>
             </div>
@@ -18,6 +18,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 <input class="lui-input" type="text" ng-model="vm.username" placeholder="Username" />
                 <label class="lui-label">Password</label>
                 <input class="lui-input" type="password" ng-model="vm.password" placeholder="Password" />
+                <label class="lui-label">Host</label>
+                <input class="lui-input" type="text" ng-model="vm.host" placeholder="Host" />
                 <div class="lui-label connectionInfo" ng-class="{'success': connectionSuccessful}">{{vm.connectionInfo}}</div>
                 <label class="lui-label">If you do not assign a password, a signing is required.</label>
                 <label class="lui-label">Version: {{vm.version}}</label>

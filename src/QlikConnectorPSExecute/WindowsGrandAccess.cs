@@ -11,7 +11,8 @@ namespace QlikConnectorPSExecute
 {
     #region Usings
     using System;
-    using System.Collections.Generic;
+    using System.DirectoryServices;
+    using System.DirectoryServices.AccountManagement;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Security.AccessControl;
@@ -57,11 +58,37 @@ namespace QlikConnectorPSExecute
         private SafeHandle DSafeHandle { get; set; }
         #endregion
 
+        #region Logger
+        private static PseLogger logger = PseLogger.CreateLogger();
+        #endregion
+
         #region Constructor & Dispose
         public WindowsGrandAccess(NTAccount accountInfo, int windowStationMask, int desktopMask)
         {
             if (accountInfo != null)
-                Init(accountInfo, windowStationMask, desktopMask);
+            {
+                AccountInfo = accountInfo;
+                Init(windowStationMask, desktopMask);
+            }
+        }
+
+        private void Init(int windowStationMask, int desktopMask)
+        {
+            try
+            {
+                WsSafeHandle = new NoopSafeHandle(GetProcessWindowStation());
+                WindowStationSecurity = new GenericSecurity(false, ResourceType.WindowObject, WsSafeHandle, AccessControlSections.Access);
+
+                DSafeHandle = new NoopSafeHandle(GetThreadDesktop(GetCurrentThreadId()));
+                DesktopSecurity = new GenericSecurity(false, ResourceType.WindowObject, DSafeHandle, AccessControlSections.Access);
+
+                OldWindowStationMask = ReadAccessMask(WindowStationSecurity, WsSafeHandle, windowStationMask);
+                OldDesktopMask = ReadAccessMask(DesktopSecurity, DSafeHandle, desktopMask);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "The account couldn´t not init.");
+            }
         }
 
         public void Dispose()
@@ -82,20 +109,6 @@ namespace QlikConnectorPSExecute
         #endregion
 
         #region Methods
-        private void Init(NTAccount accountInfo, int windowStationMask, int desktopMask)
-        {
-            AccountInfo = accountInfo;
-
-            WsSafeHandle = new NoopSafeHandle(GetProcessWindowStation());
-            WindowStationSecurity = new GenericSecurity(false, ResourceType.WindowObject, WsSafeHandle, AccessControlSections.Access);
-
-            DSafeHandle = new NoopSafeHandle(GetThreadDesktop(GetCurrentThreadId()));
-            DesktopSecurity = new GenericSecurity(false, ResourceType.WindowObject, DSafeHandle, AccessControlSections.Access);
-
-            OldWindowStationMask = ReadAccessMask(WindowStationSecurity, WsSafeHandle, windowStationMask);
-            OldDesktopMask = ReadAccessMask(DesktopSecurity, DSafeHandle, desktopMask);
-        }
-
         private AuthorizationRuleCollection GetAccessRules(GenericSecurity security)
         {
             return security.GetAccessRules(true, false, typeof(NTAccount));
@@ -109,11 +122,14 @@ namespace QlikConnectorPSExecute
             if (!username.Contains("\\"))
                 username = $"{Environment.UserDomainName}\\{username}";
 
-            var userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value.ToLower() == username.ToLower() && accessMask == r.PublicAccessMask);
+            var userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => 
+                             r.IdentityReference.Value.ToLowerInvariant() == username.ToLowerInvariant() && 
+                             accessMask == r.PublicAccessMask);
             if (userResult == null)
             {
                 AddGrandAccess(security, accessMask, safeHandle);
-                userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => r.IdentityReference.Value.ToLower() == username.ToLower());
+                userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => 
+                             r.IdentityReference.Value.ToLowerInvariant() == username.ToLowerInvariant());
                 if (userResult != null)
                     return userResult.PublicAccessMask;
             }
