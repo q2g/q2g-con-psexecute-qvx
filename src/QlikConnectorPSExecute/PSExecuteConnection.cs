@@ -93,6 +93,9 @@ namespace QlikConnectorPSExecute
         {
             try
             {
+                if (account == null)
+                    return false;
+
                 var dirEntryLocalMachine = new DirectoryEntry("WinNT://" + Environment.UserDomainName + ",computer");
                 return dirEntryLocalMachine.Children.Find(account.Value, "user") != null;
             }
