@@ -46,7 +46,6 @@ class ConnectDialog {
     }
 
     constructor(input: any, scope: any) {
-        console.log("input", input);
         this.isEdit = input.editMode;
         this.scope = scope;
         this.input = input;

@@ -69,15 +69,22 @@ namespace QlikConnectorPSExecute
         #region Methods
         private bool IsRemoteComputer(string remoteName)
         {
-            switch ((remoteName ?? "").ToLowerInvariant())
+            try
             {
-                case "":                  
-                case "localhost":
-                case "127.0.0.1":
-                case ":::1":
-                    return false;                
-                default:
-                    return true;
+                switch ((remoteName ?? "").ToLowerInvariant())
+                {
+                    case "":
+                    case "localhost":
+                    case "127.0.0.1":
+                    case ":::1":
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
