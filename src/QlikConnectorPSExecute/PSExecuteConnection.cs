@@ -153,7 +153,7 @@ namespace QlikConnectorPSExecute
                         powerShell.AddParameter("Credential", new PSCredential(username, secPass));
                         accountInfo = new NTAccount(username);
 
-                        if (useRemote == false && !UserSystemCheck(accountInfo))
+                        if (!useRemote && !UserSystemCheck(accountInfo))
                             accountInfo = null;
                     }
                     else
