@@ -24,6 +24,7 @@ namespace QlikConnectorPSExecute
     using System.Threading;
     using System.Security.Principal;
     using System.DirectoryServices.AccountManagement;
+    using System.DirectoryServices;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
@@ -88,6 +89,20 @@ namespace QlikConnectorPSExecute
             }
         }
 
+        private bool UserSystemCheck(NTAccount account)
+        {
+            try
+            {
+                var dirEntryLocalMachine = new DirectoryEntry("WinNT://" + Environment.UserDomainName + ",computer");
+                return dirEntryLocalMachine.Children.Find(account.Value, "user") != null;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"The user {account.Value} not exists.");
+                return false;
+            }
+        }
+
         private QvxTable GetData(ScriptCode script, string username, string password, string workdir, string remoteName)
         {
             var actualWorkDir = Environment.CurrentDirectory;
@@ -134,6 +149,9 @@ namespace QlikConnectorPSExecute
                         Array.ForEach(password.ToArray(), secPass.AppendChar);
                         powerShell.AddParameter("Credential", new PSCredential(username, secPass));
                         accountInfo = new NTAccount(username);
+
+                        if (useRemote == false && !UserSystemCheck(accountInfo))
+                            accountInfo = null;
                     }
                     else
                     {
@@ -176,7 +194,7 @@ namespace QlikConnectorPSExecute
                         powerShell.AddCommand("Receive-Job");
                     }
 
-                    using (var windowsGrandAccess = new WindowsGrandAccess(accountInfo, useRemote,
+                    using (var windowsGrandAccess = new WindowsGrandAccess(accountInfo,
                                                         WindowsGrandAccess.WindowStationAllAccess,
                                                         WindowsGrandAccess.DesktopRightsAllAccess))
                     {

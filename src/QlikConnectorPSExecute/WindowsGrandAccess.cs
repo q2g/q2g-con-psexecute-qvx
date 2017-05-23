@@ -63,15 +63,12 @@ namespace QlikConnectorPSExecute
         #endregion
 
         #region Constructor & Dispose
-        public WindowsGrandAccess(NTAccount accountInfo, bool remote, int windowStationMask, int desktopMask)
+        public WindowsGrandAccess(NTAccount accountInfo, int windowStationMask, int desktopMask)
         {
-            if (accountInfo != null && remote == false)
+            if (accountInfo != null)
             {
                 AccountInfo = accountInfo;
-                if (UserSystemCheck())
-                    Init(windowStationMask, desktopMask);
-                else
-                    AccountInfo = null;
+                Init(windowStationMask, desktopMask);
             }
         }
 
@@ -112,20 +109,6 @@ namespace QlikConnectorPSExecute
         #endregion
 
         #region Methods
-        private bool UserSystemCheck()
-        {
-            try
-            {
-                var dirEntryLocalMachine = new DirectoryEntry("WinNT://" + Environment.UserDomainName + ",computer");
-                return dirEntryLocalMachine.Children.Find(AccountInfo.Value, "user") != null;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, $"The user {AccountInfo.Value} not exists.");
-                return false;
-            }
-        }
-
         private AuthorizationRuleCollection GetAccessRules(GenericSecurity security)
         {
             return security.GetAccessRules(true, false, typeof(NTAccount));
