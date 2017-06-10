@@ -6,7 +6,7 @@ Qlik Connector to Execute PS Scripts
 
 ### binary
 
-1. Got to Qlik Market and Download the ZIP
+1. Got to Qlik Market and [Download the ZIP](http://market.qlik.com/solutions/akquinet_Powershell_Execute)
 2. Copy it to:
 C:\Program Files (x86)\Common Files\Qlik\Custom Data\
 or
