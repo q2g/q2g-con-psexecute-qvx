@@ -124,7 +124,7 @@ namespace QlikConnectorPSExecute
         }
         #endregion
 
-        #region Methods
+        #region Private Methods
         private void LookupAccount(string accountName, ref IntPtr sid, ref IntPtr policyHandle)
         {
             int sidSize = 0;
@@ -293,7 +293,7 @@ namespace QlikConnectorPSExecute
         }
         #endregion
 
-        #region Static Methods
+        #region Private Methods
         private bool IsLocalWinUser()
         {
             string strMachineName = Environment.MachineName.ToUpperInvariant();
