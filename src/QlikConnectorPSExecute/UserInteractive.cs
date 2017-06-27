@@ -296,7 +296,7 @@ namespace QlikConnectorPSExecute
         #region Private Methods
         private bool IsLocalWinUser()
         {
-            string strMachineName = Environment.MachineName.ToUpperInvariant();
+            var strMachineName = Environment.MachineName.ToUpperInvariant();
             var accountName = WindowsIdentity.GetCurrent().Name.ToUpperInvariant();
             return accountName.Contains(strMachineName);
         }       
