@@ -259,28 +259,36 @@ namespace QlikConnectorPSExecute
         private bool IsLocalUser { get; set; }
         private NTAccount AccountInfo { get; set; }
         private string CurrentRight { get; set; }
+        private string AccountName { get; set; }
         private LocalSecurityAuthorityController Controller = new LocalSecurityAuthorityController();
         #endregion
 
         #region Constructor
         public InteractiveUser(NTAccount accountInfo)
         {
-            if (String.IsNullOrEmpty(CurrentRight))
-                CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
+            try
+            { 
+                if (String.IsNullOrEmpty(CurrentRight))
+                    CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
 
-            AccountInfo = accountInfo;
+                AccountInfo = accountInfo;
 
-            IsLocalUser = IsLocalWinUser();
-            if (!IsLocalUser)
-            {
-                var results = Controller.GetRights(AccountInfo.Value);
-                if (!results.Contains(CurrentRight))
+                IsLocalUser = IsLocalWinUser();
+                if (!IsLocalUser)
                 {
-                    Controller.SetRight(AccountInfo.Value, CurrentRight, false);
-                    IsLocallyDomainUser = false;
+                    var results = Controller.GetRights(AccountInfo?.Value);
+                    if (!results.Contains(CurrentRight))
+                    {
+                        Controller.SetRight(AccountInfo?.Value, CurrentRight, false);
+                        IsLocallyDomainUser = false;
+                    }
+                    else
+                        IsLocallyDomainUser = true;
                 }
-                else
-                    IsLocallyDomainUser = true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"The user \"{AccountName}\" has too few rights.", ex);
             }
         }
 
@@ -297,8 +305,8 @@ namespace QlikConnectorPSExecute
         private bool IsLocalWinUser()
         {
             var strMachineName = Environment.MachineName.ToUpperInvariant();
-            var accountName = WindowsIdentity.GetCurrent().Name.ToUpperInvariant();
-            return accountName.Contains(strMachineName);
+            AccountName = WindowsIdentity.GetCurrent().Name.ToUpperInvariant();
+            return AccountName.Contains(strMachineName);
         }       
         #endregion
     }
