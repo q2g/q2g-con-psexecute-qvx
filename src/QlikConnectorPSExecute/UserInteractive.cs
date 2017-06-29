@@ -179,7 +179,7 @@ namespace QlikConnectorPSExecute
                 var newPtr = new IntPtr(userRightsPtr.ToInt32());
                 if (IntPtr.Size == 8)
                     newPtr = new IntPtr(userRightsPtr.ToInt64());
-               
+
                 LSA_UNICODE_STRING userRight;
 
                 int ptr = 0;
@@ -267,7 +267,7 @@ namespace QlikConnectorPSExecute
         public InteractiveUser(NTAccount accountInfo)
         {
             try
-            { 
+            {
                 if (String.IsNullOrEmpty(CurrentRight))
                     CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
 
@@ -307,7 +307,7 @@ namespace QlikConnectorPSExecute
             var strMachineName = Environment.MachineName.ToUpperInvariant();
             AccountName = WindowsIdentity.GetCurrent().Name.ToUpperInvariant();
             return AccountName.Contains(strMachineName);
-        }       
+        }
         #endregion
     }
 }
