@@ -124,7 +124,7 @@ namespace QlikConnectorPSExecute
         }
         #endregion
 
-        #region Methods
+        #region Private Methods
         private void LookupAccount(string accountName, ref IntPtr sid, ref IntPtr policyHandle)
         {
             int sidSize = 0;
@@ -179,7 +179,7 @@ namespace QlikConnectorPSExecute
                 var newPtr = new IntPtr(userRightsPtr.ToInt32());
                 if (IntPtr.Size == 8)
                     newPtr = new IntPtr(userRightsPtr.ToInt64());
-               
+
                 LSA_UNICODE_STRING userRight;
 
                 int ptr = 0;
@@ -259,28 +259,36 @@ namespace QlikConnectorPSExecute
         private bool IsLocalUser { get; set; }
         private NTAccount AccountInfo { get; set; }
         private string CurrentRight { get; set; }
+        private string AccountName { get; set; }
         private LocalSecurityAuthorityController Controller = new LocalSecurityAuthorityController();
         #endregion
 
         #region Constructor
         public InteractiveUser(NTAccount accountInfo)
         {
-            if (String.IsNullOrEmpty(CurrentRight))
-                CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
-
-            AccountInfo = accountInfo;
-
-            IsLocalUser = IsLocalWinUser();
-            if (!IsLocalUser)
+            try
             {
-                var results = Controller.GetRights(AccountInfo.Value);
-                if (!results.Contains(CurrentRight))
+                if (String.IsNullOrEmpty(CurrentRight))
+                    CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
+
+                AccountInfo = accountInfo;
+
+                IsLocalUser = IsLocalWinUser();
+                if (!IsLocalUser)
                 {
-                    Controller.SetRight(AccountInfo.Value, CurrentRight, false);
-                    IsLocallyDomainUser = false;
+                    var results = Controller.GetRights(AccountInfo?.Value);
+                    if (!results.Contains(CurrentRight))
+                    {
+                        Controller.SetRight(AccountInfo?.Value, CurrentRight, false);
+                        IsLocallyDomainUser = false;
+                    }
+                    else
+                        IsLocallyDomainUser = true;
                 }
-                else
-                    IsLocallyDomainUser = true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"The user \"{AccountName}\" has too few rights.", ex);
             }
         }
 
@@ -293,12 +301,13 @@ namespace QlikConnectorPSExecute
         }
         #endregion
 
-        #region Static Methods
+        #region Private Methods
         private bool IsLocalWinUser()
         {
-            string strMachineName = System.Environment.MachineName;
-            return WindowsIdentity.GetCurrent().Name.ToUpper().Contains(strMachineName.ToUpper());
-        }       
+            var strMachineName = Environment.MachineName.ToUpperInvariant();
+            AccountName = WindowsIdentity.GetCurrent().Name.ToUpperInvariant();
+            return AccountName.Contains(strMachineName);
+        }
         #endregion
     }
 }
