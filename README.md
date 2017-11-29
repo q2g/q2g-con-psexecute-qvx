@@ -10,7 +10,7 @@ Qlik Connector to Execute PS Scripts
 2. Copy it to:
 C:\Program Files (x86)\Common Files\Qlik\Custom Data\
 or
-%appdata%\..\Local\Programs\Common Files\Qlik\Custom Data\
+%appdata%\\..\Local\Programs\Common Files\Qlik\Custom Data\
 3. unzip
 
 ### source
