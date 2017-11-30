@@ -23,7 +23,10 @@ or
 For the usage just have a look to the further documentation.
 
 1. [PS Examples](docs/PS_Examples.md)
-2. [Working with Signatures](docs/Signature.md)
+2. [Install](docs/install.md)
+3. [Working with Signatures](docs/Signature.md)
+4. [Working with Remoting](docs/SetupPowerShellRemoting.md)
+5. [Versions](docs/Version.md)
 
 ## Bugs & Co.
 

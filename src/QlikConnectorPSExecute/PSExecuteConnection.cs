@@ -201,7 +201,7 @@ namespace QlikConnectorPSExecute
                                                         WindowsGrandAccess.WindowStationAllAccess,
                                                         WindowsGrandAccess.DesktopRightsAllAccess))
                     {
-                        using (var interactiveUser = new InteractiveUser(accountInfo))
+                        using (var interactiveUser = new InteractiveUser(accountInfo, IsQlikDesktopApp))
                         {
                             // Run PowerShell
                             var results = powerShell.Invoke();

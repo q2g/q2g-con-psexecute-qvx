@@ -176,10 +176,18 @@ namespace QlikConnectorPSExecute
                     throw new Win32Exception((int)winErrorCode, $"LsaEnumerateAccountRights failed: {winErrorCode}");
                 }
 
-                var newPtr = new IntPtr(userRightsPtr.ToInt32());
-                if (IntPtr.Size == 8)
+                var newPtr = IntPtr.Zero;
+                try
+                {
+                    newPtr = new IntPtr(userRightsPtr.ToInt32());
+                    if (IntPtr.Size == 8)
+                        newPtr = new IntPtr(userRightsPtr.ToInt64());
+                }
+                catch
+                {
                     newPtr = new IntPtr(userRightsPtr.ToInt64());
-
+                }
+                
                 LSA_UNICODE_STRING userRight;
 
                 int ptr = 0;
@@ -264,10 +272,13 @@ namespace QlikConnectorPSExecute
         #endregion
 
         #region Constructor
-        public InteractiveUser(NTAccount accountInfo)
+        public InteractiveUser(NTAccount accountInfo, bool IsQlikDesktop)
         {
             try
             {
+                if (accountInfo == null && IsQlikDesktop == true)
+                    return;
+
                 if (String.IsNullOrEmpty(CurrentRight))
                     CurrentRight = LocalSecurityAuthorityRights.InteractiveLogon;
 
