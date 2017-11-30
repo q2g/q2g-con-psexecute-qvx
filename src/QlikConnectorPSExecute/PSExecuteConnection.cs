@@ -108,6 +108,8 @@ namespace QlikConnectorPSExecute
 
         private QvxTable GetData(ScriptCode script, string username, string password, string workdir, string remoteName)
         {
+            Thread.Sleep(10000);
+
             var actualWorkDir = Environment.CurrentDirectory;
             var useRemote = IsRemoteComputer(remoteName);
 
@@ -201,7 +203,7 @@ namespace QlikConnectorPSExecute
                                                         WindowsGrandAccess.WindowStationAllAccess,
                                                         WindowsGrandAccess.DesktopRightsAllAccess))
                     {
-                        using (var interactiveUser = new InteractiveUser(accountInfo))
+                        using (var interactiveUser = new InteractiveUser(accountInfo, IsQlikDesktopApp))
                         {
                             // Run PowerShell
                             var results = powerShell.Invoke();
