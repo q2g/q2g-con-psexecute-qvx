@@ -108,8 +108,6 @@ namespace QlikConnectorPSExecute
 
         private QvxTable GetData(ScriptCode script, string username, string password, string workdir, string remoteName)
         {
-            Thread.Sleep(10000);
-
             var actualWorkDir = Environment.CurrentDirectory;
             var useRemote = IsRemoteComputer(remoteName);
 
