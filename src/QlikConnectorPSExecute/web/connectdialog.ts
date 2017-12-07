@@ -77,14 +77,7 @@ class ConnectDialog {
             try {
                 this.username = (info.qMessage as string);
                 this.olduser = this.username;
-            } catch (e) {
-            }
-        });
-
-        input.serverside.sendJsonRequest("getFakePassword").then((info) => {
-            try {
-                this.password = (info.qMessage as string);
-                this.passlength = this.password.length; 
+                this.password = "**********";
             } catch (e) {
             }
         });
@@ -102,7 +95,7 @@ class ConnectDialog {
             this.connectionInfo = "Please enter a name for the connection.";
         } else {
             if (this.isEdit) {
-                var overrideCredentials = this.username !== this.olduser || this.password.length !== this.passlength;
+                var overrideCredentials = this.username !== this.olduser || this.password.length !== 10;
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,

@@ -63,9 +63,6 @@ namespace QlikConnectorPSExecute
                     case "getUsername":
                         response = new Info { qMessage = connection.MParameters["UserId"]};
                         break;
-                    case "getFakePassword":
-                        response = new Info { qMessage = new string('*', connection.MParameters["Password"].Length) };
-                        break;
                     default:
                         response = new Info { qMessage = "Unknown command" };
                         break;
