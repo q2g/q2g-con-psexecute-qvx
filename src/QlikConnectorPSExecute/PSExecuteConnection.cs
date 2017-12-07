@@ -41,10 +41,13 @@ namespace QlikConnectorPSExecute
             {
                 try
                 {
-                    return Process.GetCurrentProcess().Parent().MainModule.FileName.Contains(@"AppData\Local\Programs\Qlik\Sense\");
+                    return Process.GetCurrentProcess().Parent().MainModule.FileName.ToLowerInvariant().Contains(@"appdata\local\programs\qlik\sense\");
                 }
-                catch
+                catch (Exception ex)
                 {
+                    logger.Error(ex, $"The parent process was not found.");
+                    if (Process.GetProcessesByName("QlikSenseBrowser").Length > 0)
+                        return true;
                     return false;
                 }
             }

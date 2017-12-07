@@ -12,6 +12,8 @@ namespace QlikConnectorPSExecute
     #region Usings
     using System;
     using QlikView.Qvx.QvxLibrary;
+    using System.Text.RegularExpressions;
+    using System.Threading;
     #endregion
 
     public class PSExecuteServer : QvxServer
@@ -52,11 +54,17 @@ namespace QlikConnectorPSExecute
             try
             {
                 QvDataContractResponse response;
-
+                
                 switch (method)
                 {
                     case "getVersion":
                         response = new Info { qMessage = GitVersionInformation.InformationalVersion };
+                        break;
+                    case "getUsername":
+                        response = new Info { qMessage = connection.MParameters["UserId"]};
+                        break;
+                    case "getFakePassword":
+                        response = new Info { qMessage = new string('*', connection.MParameters["Password"].Length) };
                         break;
                     default:
                         response = new Info { qMessage = "Unknown command" };

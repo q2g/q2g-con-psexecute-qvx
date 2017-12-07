@@ -10,8 +10,8 @@ import "css!QlikConnectorPSExecute.webroot/connectdialog.css";
 
 class ConnectDialog {
     name: string="";
-    username: string;
     password: string;
+    olduser: string;
     host: string="";
     isEdit: boolean;
     provider: string = "QlikConnectorPSExecute.exe";
@@ -22,6 +22,17 @@ class ConnectDialog {
     scope: any;
 
     info = "Connector for Windows PowerShell.";
+
+    private _username: string;
+    get username(): string {
+        return this._username;
+    }
+    set username(v: string) {
+        if (v !== this._username) {
+            this._username = v;
+            this.password = '';
+        }
+    }
 
     get isOkEnabled(): boolean {
         try {
@@ -61,9 +72,24 @@ class ConnectDialog {
             });
         }
 
+        input.serverside.sendJsonRequest("getUsername").then((info) => {
+            try {
+                this.username = (info.qMessage as string);
+                this.olduser = this.username;
+            } catch (e) {
+            }
+        });
+
+        input.serverside.sendJsonRequest("getFakePassword").then((info) => {
+            try {
+                    this.password = (info.qMessage as string);
+            } catch (e) {
+            }
+        });
+
         input.serverside.sendJsonRequest("getVersion").then((info) => {
             try {
-                this.version = (info.qMessage as String).replace(".Sha.", " Sha.");
+                this.version = (info.qMessage as string).replace(".Sha.", " Sha.");
             } catch (e) {
             }
         });
@@ -74,7 +100,7 @@ class ConnectDialog {
             this.connectionInfo = "Please enter a name for the connection.";
         } else {
             if (this.isEdit) {
-                var overrideCredentials = this.username !== "" && this.password !== "";
+                var overrideCredentials = this.username !== this.olduser;
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,
