@@ -12,6 +12,7 @@ class ConnectDialog {
     name: string="";
     password: string;
     olduser: string;
+    passlength: number;
     host: string="";
     isEdit: boolean;
     provider: string = "QlikConnectorPSExecute.exe";
@@ -82,7 +83,8 @@ class ConnectDialog {
 
         input.serverside.sendJsonRequest("getFakePassword").then((info) => {
             try {
-                    this.password = (info.qMessage as string);
+                this.password = (info.qMessage as string);
+                this.passlength = this.password.length; 
             } catch (e) {
             }
         });
@@ -100,7 +102,7 @@ class ConnectDialog {
             this.connectionInfo = "Please enter a name for the connection.";
         } else {
             if (this.isEdit) {
-                var overrideCredentials = this.username !== this.olduser;
+                var overrideCredentials = this.username !== this.olduser || this.password.length !== this.passlength;
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,
