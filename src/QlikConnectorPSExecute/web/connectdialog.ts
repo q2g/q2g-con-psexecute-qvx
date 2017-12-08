@@ -95,7 +95,7 @@ class ConnectDialog {
             this.connectionInfo = "Please enter a name for the connection.";
         } else {
             if (this.isEdit) {
-                var overrideCredentials = this.username !== this.olduser || this.password.length !== 10;
+                var overrideCredentials = this.username !== this.olduser || this.password !== "**********";
                 this.input.serverside.modifyConnection(
                     this.input.instanceId,
                     this.name,
