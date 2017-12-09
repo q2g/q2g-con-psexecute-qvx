@@ -1,5 +1,7 @@
 
 # qlik-connector-psexecute
+[![Downloads](https://m.sense2go.net/downloads.svg?q2g-ext-selector)](https://m.sense2go.net/extension-package)
+
 Qlik Connector to Execute PS Scripts
 
 ## Install
