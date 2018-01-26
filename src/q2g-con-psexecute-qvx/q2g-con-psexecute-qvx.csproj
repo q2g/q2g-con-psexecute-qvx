@@ -220,7 +220,7 @@
   </Target>
   <Target Name="AfterBuild">
     <Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;PS Execute Connector&quot;" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;q2g-con-psexecute-qvx&quot;" />
     <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
     <!--
     
@@ -236,8 +236,8 @@
     <ItemGroup>
       <OutputFiles Include="$(OutputPath)\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" />
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
   </Target>
   <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>

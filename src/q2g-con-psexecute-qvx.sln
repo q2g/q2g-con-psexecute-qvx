@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectorTest", "ConnectorTest\ConnectorTest.csproj", "{506F4CE2-3C6A-4D69-BBD4-E499434FC6FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QlikConnectorPSExecute", "QlikConnectorPSExecute\QlikConnectorPSExecute.csproj", "{21281672-E242-41B3-BC23-F15FF5BBCA24}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QlikConnectorPSExecute", "q2g-con-psexecute-qvx\q2g-con-psexecute-qvx.csproj", "{21281672-E242-41B3-BC23-F15FF5BBCA24}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{B7F49167-7166-4D63-AB51-3CCBB16F1C9F}"
 	ProjectSection(SolutionItems) = preProject

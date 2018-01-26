@@ -71,7 +71,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QlikConnectorPSExecute\QlikConnectorPSExecute.csproj">
+    <ProjectReference Include="..\q2g-con-psexecute-qvx\q2g-con-psexecute-qvx.csproj">
       <Project>{21281672-e242-41b3-bc23-f15ff5bbca24}</Project>
       <Name>QlikConnectorPSExecute</Name>
     </ProjectReference>
