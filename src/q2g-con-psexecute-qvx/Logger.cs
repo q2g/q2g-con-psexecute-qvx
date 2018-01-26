@@ -7,7 +7,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
-namespace QlikConnectorPSExecute
+namespace q2gconpsexecuteqvx
 {
     #region Usings
     using System;
@@ -32,8 +32,8 @@ namespace QlikConnectorPSExecute
         #region Static Methods
         public static PseLogger CreateLogger()
         {
-            var connectorPath = Assembly.GetExecutingAssembly().Location;
-            if(connectorPath.EndsWith("\\QlikConnectorPSExecute\\QlikConnectorPSExecute.exe"))
+            var connectorPath = Assembly.GetExecutingAssembly().Location.ToLowerInvariant();
+            if(connectorPath.EndsWith("\\q2gconpsexecuteqvx\\q2gconpsexecuteqvx.exe"))
             {
                 connectorPath = Path.Combine(Path.GetDirectoryName(connectorPath), "Log");
                 Directory.CreateDirectory(connectorPath);

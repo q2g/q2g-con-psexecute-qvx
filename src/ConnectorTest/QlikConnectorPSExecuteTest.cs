@@ -12,7 +12,7 @@ namespace ConnectorTest
     #region Usings
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using QlikConnectorPSExecute;
+    using q2gconpsexecuteqvx;
     using System.IO;
     using ConnectorTest.Properties;
     using QlikView.Qvx.QvxLibrary;

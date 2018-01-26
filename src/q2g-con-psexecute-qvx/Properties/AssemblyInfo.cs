@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die einer Assembly zugeordnet sind.
-[assembly: AssemblyTitle("QlikConnectorPSExecute")]
+[assembly: AssemblyTitle("q2gconpsexecuteqvx")]
 [assembly: AssemblyDescription("Qlik Connector to Execute Powershell scripts")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("akquinet")]
-[assembly: AssemblyProduct("QlikConnectorPSExecute")]
+[assembly: AssemblyProduct("q2gconpsexecuteqvx")]
 [assembly: AssemblyCopyright("Copyright © akquinet 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

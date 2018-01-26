@@ -8,8 +8,8 @@
     <ProjectGuid>{21281672-E242-41B3-BC23-F15FF5BBCA24}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>QlikConnectorPSExecute</RootNamespace>
-    <AssemblyName>QlikConnectorPSExecute</AssemblyName>
+    <RootNamespace>q2gconpsexecuteqvx</RootNamespace>
+    <AssemblyName>q2gconpsexecuteqvx</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -81,7 +81,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Frameworks\JSON\Json.601\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="QvxLibrary, Version=2.1.4.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="QvxLibrary, Version=2.1.9993.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\QvxLibrary.dll</HintPath>
     </Reference>
@@ -230,14 +230,14 @@
   </Target>
   <Target Name="DebugCopy">
     <PropertyGroup>
-      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\QlikConnectorPSExecute</QlikServerPath>
-      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\QlikConnectorPSExecute</QlikDesktopPath>
+      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikServerPath>
+      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikDesktopPath>
     </PropertyGroup>
     <ItemGroup>
       <OutputFiles Include="$(OutputPath)\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true"/>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
   </Target>
   <PropertyGroup>
     <TypeScriptTarget>ES5</TypeScriptTarget>
