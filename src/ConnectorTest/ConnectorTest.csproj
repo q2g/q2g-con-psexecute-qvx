@@ -39,9 +39,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Frameworks\JSON\Json.601\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="QvxLibrary, Version=2.1.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\QlikConnectorPSExecute\lib\QvxLibrary.dll</HintPath>
+    <Reference Include="QvxLibrary">
+      <HintPath>..\q2g-con-psexecute-qvx\lib\QvxLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -71,7 +70,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QlikConnectorPSExecute\QlikConnectorPSExecute.csproj">
+    <ProjectReference Include="..\q2g-con-psexecute-qvx\q2g-con-psexecute-qvx.csproj">
       <Project>{21281672-e242-41b3-bc23-f15ff5bbca24}</Project>
       <Name>QlikConnectorPSExecute</Name>
     </ProjectReference>
