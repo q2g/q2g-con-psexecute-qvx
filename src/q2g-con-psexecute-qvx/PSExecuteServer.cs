@@ -14,12 +14,13 @@ namespace q2gconpsexecuteqvx
     using QlikView.Qvx.QvxLibrary;
     using System.Text.RegularExpressions;
     using System.Threading;
+    using NLog;
     #endregion
 
     public class PSExecuteServer : QvxServer
     {
         #region Logger
-        private static PseLogger logger = PseLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Methods

@@ -217,17 +217,5 @@ namespace ConnectorTest
                 Assert.AreEqual(results[0].ToString(), credentials.UserName);
             }
         }
-
-        [TestCategory("LoggerTest"), TestMethod]
-        public void CreateLogger()
-        {
-            var logger = PseLogger.CreateLogger();
-            logger.Warn("TestWarning");
-
-            var subex = new Exception("SubExeption");
-            var ex = new Exception("MainExeption", subex);
-            logger.Error(ex, "TestError");
-            logger.Error(ex, "TestError");
-        }
     }
 }
