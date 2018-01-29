@@ -9,6 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace q2gconpsexecuteqvx
 {
+    using NLog;
     #region Usings
     using System;
     using System.DirectoryServices;
@@ -59,7 +60,7 @@ namespace q2gconpsexecuteqvx
         #endregion
 
         #region Logger
-        private static PseLogger logger = PseLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Constructor & Dispose

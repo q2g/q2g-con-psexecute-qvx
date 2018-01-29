@@ -25,12 +25,13 @@ namespace q2gconpsexecuteqvx
     using System.Security.Principal;
     using System.DirectoryServices.AccountManagement;
     using System.DirectoryServices;
+    using NLog;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
     {
         #region Logger
-        private static PseLogger logger = PseLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Properties & Variables
@@ -211,8 +212,7 @@ namespace q2gconpsexecuteqvx
 
                             foreach (var error in powerShell.Streams.Error.ReadAll())
                             {
-                                var exString = PseLogger.GetFullExceptionString(error.Exception);
-                                Errors.Append($"\n{exString}");
+                                logger.Error(error.Exception, "PowerShell Error");
                             }
                             if (Errors.Length > 0)
                             {

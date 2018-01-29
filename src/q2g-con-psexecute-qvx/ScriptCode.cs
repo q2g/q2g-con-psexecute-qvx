@@ -14,12 +14,13 @@ namespace q2gconpsexecuteqvx
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Newtonsoft.Json;
+    using NLog;
     #endregion
 
     public class ScriptCode
     {
         #region Logger
-        private static PseLogger logger = PseLogger.CreateLogger();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Variables & Properties
