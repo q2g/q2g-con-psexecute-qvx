@@ -50,7 +50,7 @@ namespace q2gconpsexecuteqvx
         public static int WindowStationAllAccess { get; private set; } = 0x000f037f;
         public static int DesktopRightsAllAccess { get; private set; } = 0x000f01ff;
 
-        private GenericSecurity WindowStationSecurity {get; set;}
+        private GenericSecurity WindowStationSecurity { get; set; }
         private GenericSecurity DesktopSecurity { get; set; }
         private int? OldWindowStationMask { get; set; }
         private int? OldDesktopMask { get; set; }
@@ -123,19 +123,19 @@ namespace q2gconpsexecuteqvx
             if (!username.Contains("\\"))
                 username = $"{Environment.UserDomainName}\\{username}";
 
-            var userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => 
-                             r.IdentityReference.Value.ToLowerInvariant() == username.ToLowerInvariant() && 
+            var userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r =>
+                             r.IdentityReference.Value.ToLowerInvariant() == username.ToLowerInvariant() &&
                              accessMask == r.PublicAccessMask);
             if (userResult == null)
             {
                 AddGrandAccess(security, accessMask, safeHandle);
-                userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r => 
+                userResult = ruels.Cast<GrantAccessRule>().SingleOrDefault(r =>
                              r.IdentityReference.Value.ToLowerInvariant() == username.ToLowerInvariant());
                 if (userResult != null)
                     return userResult.PublicAccessMask;
             }
             else
-              return userResult.PublicAccessMask;
+                return userResult.PublicAccessMask;
 
             return null;
         }
@@ -243,11 +243,13 @@ namespace q2gconpsexecuteqvx
                                      InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags,
                                      AccessControlType type) :
                                      base(identity, accessMask, isInherited,
-                                          inheritanceFlags, propagationFlags, type) { }
+                                          inheritanceFlags, propagationFlags, type)
+            { }
 
             public GrantAccessRule(IdentityReference identity, int accessMask, AccessControlType type) :
                 base(identity, accessMask, false, InheritanceFlags.None,
-                     PropagationFlags.None, type) { }
+                     PropagationFlags.None, type)
+            { }
 
             public int PublicAccessMask
             {
@@ -259,7 +261,8 @@ namespace q2gconpsexecuteqvx
         private class NoopSafeHandle : SafeHandle
         {
             public NoopSafeHandle(IntPtr handle) :
-                base(handle, false) {}
+                base(handle, false)
+            { }
 
             public override bool IsInvalid
             {

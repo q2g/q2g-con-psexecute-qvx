@@ -1,5 +1,6 @@
 
 # qlik-connector-psexecute
+[![CodeFactor](https://www.codefactor.io/repository/github/q2g/q2g-con-psexecute-qvx/badge/master)](https://www.codefactor.io/repository/github/q2g/q2g-con-psexecute-qvx/overview/master)
 [![Downloads](https://m.sense2go.net/downloads.svg?q2g-ext-selector)](https://m.sense2go.net/extension-package)
 
 Qlik Connector to Execute PS Scripts
