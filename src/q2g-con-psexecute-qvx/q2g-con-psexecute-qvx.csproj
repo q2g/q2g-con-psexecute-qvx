@@ -3,7 +3,7 @@
 		<TargetFramework>net452</TargetFramework>
 		<OutputType>Exe</OutputType>
 
-		<Copyright>Copyright © 2017</Copyright>
+		<Copyright>Copyright © 2019</Copyright>
 		<Authors>Konrad Mattheis, Martin Berthold</Authors>
 		<Company>q2g</Company>
 		<Description></Description>
@@ -52,19 +52,17 @@
 		<TypeScriptSourceMap>True</TypeScriptSourceMap>
 		<TypeScriptMapRoot />
 		<TypeScriptSourceRoot />
+		<AssemblyName>q2gconpsexecuteqvx</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<TypeScriptCompile Include="web\*.ts" />
 
 		<Content Include="web\connector-main.js" DependentUpon="connector-main.ts" CopyToOutputDirectory="Always" />
-
 		<Content Include="web\selectdialog.js" DependentUpon="selectdialog.ts" CopyToOutputDirectory="Always" />
 		<Content Include="web\connectdialog.js" DependentUpon="connectdialog.ts" CopyToOutputDirectory="Always" />
-
 		<Content Include="web\connectdialog.css" DependentUpon="connectdialog.less" CopyToOutputDirectory="Always" />
 		<Content Include="web\connectdialog.ng.html" CopyToOutputDirectory="Always" />
-
 		<Content Include="compilerconfig.json.defaults" DependentUpon="compilerconfig.json" />
 
 		<None Include="tsconfig.json" />
@@ -82,13 +80,23 @@
 
 	<Target Name="verpatch" AfterTargets="Build">
 		<Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
-		<Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G Sense App&quot;" />
+		<Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G PowerShell&quot;" />
 		<Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
+		<CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />
+    <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
+  </Target>
 
-		<!--<CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
-		<CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />-->
-	</Target>
-	<Target Name="DebugCopy">
+  <Target Name="ZipPacked">
+    <Message Importance="High" Text="Version:$(GitVersion_InformationalVersion)" />
+    <Message Importance="High" Text="OutputPath: $(OutputPath)" />
+    <ItemGroup>
+      <ZipFiles Include="$(OutputPath)\*.*" />
+      <ZipFiles Include="$(OutputPath)\web\" />
+    </ItemGroup>
+    <Exec Command="PowerShell -command Compress-Archive -force @(ZipFiles, ',') $(MSBuildProjectDirectory)\bin\$(AssemblyName).zip" />
+  </Target>
+
+  <Target Name="DebugCopy">
 		<PropertyGroup>
 			<QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikServerPath>
 			<QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikDesktopPath>
