@@ -130,8 +130,10 @@ namespace q2gconpsexecuteqvx
                 }
             }
 
-            var resultTable = new QvxTable();
-            resultTable.TableName = script.TableName;
+            var resultTable = new QvxTable()
+            {
+                TableName = script.TableName
+            };
 
             try
             {
@@ -271,10 +273,10 @@ namespace q2gconpsexecuteqvx
             {
                 var script = ScriptCode.Parse(query);
 
-                var username = "";
-                var password = "";
-                var workdir = "";
-                var hostName = "";
+                var username = String.Empty;
+                var password = String.Empty;
+                var workdir = String.Empty;
+                var hostName = String.Empty;
                 this.MParameters.TryGetValue("userid", out username);
                 this.MParameters.TryGetValue("password", out password);
                 this.MParameters.TryGetValue("workdir", out workdir);
