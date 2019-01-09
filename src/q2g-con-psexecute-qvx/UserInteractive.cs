@@ -187,7 +187,7 @@ namespace q2gconpsexecuteqvx
                 {
                     newPtr = new IntPtr(userRightsPtr.ToInt64());
                 }
-                
+
                 LSA_UNICODE_STRING userRight;
 
                 int ptr = 0;

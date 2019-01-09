@@ -10,16 +10,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace q2gconpsexecuteqvx
 {
     #region Usings
+    using System;
+    using System.IO;
+    using System.Security.Cryptography;
+    using System.Text;
     using Org.BouncyCastle.Crypto;
     using Org.BouncyCastle.Crypto.Generators;
     using Org.BouncyCastle.Crypto.Parameters;
     using Org.BouncyCastle.Crypto.Prng;
     using Org.BouncyCastle.OpenSsl;
     using Org.BouncyCastle.Security;
-    using System;
-    using System.IO;
-    using System.Security.Cryptography;
-    using System.Text;
     #endregion
 
     public class CryptoManager
@@ -81,7 +81,7 @@ namespace q2gconpsexecuteqvx
                 var sig = Convert.FromBase64String(sign);
                 ISigner signer = SignerUtilities.GetSigner(algorithm);
                 signer.Init(false, PublicKey);
-                
+
                 var msgBytes = Encoding.UTF8.GetBytes(data);
                 signer.BlockUpdate(msgBytes, 0, msgBytes.Length);
                 return signer.VerifySignature(sig);
@@ -105,7 +105,7 @@ namespace q2gconpsexecuteqvx
             return keyPairGenerator.GenerateKeyPair();
         }
 
-        public string SignWithPrivateKey(string data, bool write_algo_as_prefix=false,  bool use_indent=false, string algorithm="SHA256")
+        public string SignWithPrivateKey(string data, bool write_algo_as_prefix = false, bool use_indent = false, string algorithm = "SHA256")
         {
             var rsa = RSA.Create() as RSACryptoServiceProvider;
             var rsaParameters = DotNetUtilities.ToRSAParameters(PrivateKey);
@@ -121,7 +121,7 @@ namespace q2gconpsexecuteqvx
                 prefix = $"{algorithm}:\n";
 
             if (use_indent)
-               return prefix + Convert.ToBase64String(sig, Base64FormattingOptions.InsertLineBreaks);
+                return prefix + Convert.ToBase64String(sig, Base64FormattingOptions.InsertLineBreaks);
 
             return prefix + Convert.ToBase64String(sig);
         }

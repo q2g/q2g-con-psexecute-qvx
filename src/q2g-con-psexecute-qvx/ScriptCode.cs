@@ -65,7 +65,7 @@ namespace q2gconpsexecuteqvx
             try
             {
                 var resultScript = new ScriptCode(script);
-                if(resultScript.Read(null))
+                if (resultScript.Read(null))
                 {
                     return resultScript;
                 }
@@ -111,7 +111,7 @@ namespace q2gconpsexecuteqvx
                 {
                     Parameters = JsonConvert.DeserializeObject<List<string>>(args);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.Error(ex, "The script arguments could not be read in JSON.");
                 }
@@ -169,7 +169,7 @@ namespace q2gconpsexecuteqvx
                 var signature = Regex.Match(text, $"{Algorithm}:\n([^;]*);", RegexOptions.Singleline).Groups[1].Value;
                 return signature.Replace("\n", "\r\n");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.Error(ex, "The signature could not be read.");
                 return null;

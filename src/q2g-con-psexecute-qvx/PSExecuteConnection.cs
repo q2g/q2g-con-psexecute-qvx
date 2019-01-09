@@ -13,19 +13,19 @@ namespace q2gconpsexecuteqvx
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Linq;
-    using System.Text;
-    using QlikView.Qvx.QvxLibrary;
-    using System.Management.Automation;
-    using System.IO;
     using System.Diagnostics;
-    using System.Security;
-    using System.Runtime.Serialization.Formatters.Binary;
-    using System.Threading;
-    using System.Security.Principal;
-    using System.DirectoryServices.AccountManagement;
     using System.DirectoryServices;
+    using System.DirectoryServices.AccountManagement;
+    using System.IO;
+    using System.Linq;
+    using System.Management.Automation;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System.Security;
+    using System.Security.Principal;
+    using System.Text;
+    using System.Threading;
     using NLog;
+    using QlikView.Qvx.QvxLibrary;
     #endregion
 
     public class PSExecuteConnection : QvxConnection
@@ -130,8 +130,10 @@ namespace q2gconpsexecuteqvx
                 }
             }
 
-            var resultTable = new QvxTable();
-            resultTable.TableName = script.TableName;
+            var resultTable = new QvxTable()
+            {
+                TableName = script.TableName
+            };
 
             try
             {
@@ -167,7 +169,7 @@ namespace q2gconpsexecuteqvx
                             logger.Warn("A remote connection without user credentials is not allowed.");
                             return resultTable;
                         }
-                            
+
                         if (!IsQlikDesktopApp)
                         {
                             // check signature
@@ -271,10 +273,10 @@ namespace q2gconpsexecuteqvx
             {
                 var script = ScriptCode.Parse(query);
 
-                var username = "";
-                var password = "";
-                var workdir = "";
-                var hostName = "";
+                var username = String.Empty;
+                var password = String.Empty;
+                var workdir = String.Empty;
+                var hostName = String.Empty;
                 this.MParameters.TryGetValue("userid", out username);
                 this.MParameters.TryGetValue("password", out password);
                 this.MParameters.TryGetValue("workdir", out workdir);
