@@ -305,9 +305,16 @@ namespace q2gconpsexecuteqvx
 
         public void Dispose()
         {
-            if (!IsLocallyDomainUser && !IsLocalUser)
+            try
             {
-                Controller.SetRight(AccountInfo.Value, CurrentRight, true);
+                if (!IsLocallyDomainUser && !IsLocalUser && AccountInfo != null)
+                {
+                    Controller.SetRight(AccountInfo.Value, CurrentRight, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("The dispose was failed.", ex);
             }
         }
         #endregion
