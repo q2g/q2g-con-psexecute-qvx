@@ -9,7 +9,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace q2gconpsexecuteqvx
 {
-    using NLog;
     #region Usings
     using System;
     using System.DirectoryServices;
@@ -18,6 +17,7 @@ namespace q2gconpsexecuteqvx
     using System.Runtime.InteropServices;
     using System.Security.AccessControl;
     using System.Security.Principal;
+    using NLog;
     #endregion
 
     // ToDo: Mask nicht neu setzen unterschiede, noch zu beachten!!!
