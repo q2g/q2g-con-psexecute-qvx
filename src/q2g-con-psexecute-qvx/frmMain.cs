@@ -74,7 +74,7 @@ namespace q2gconpsexecuteqvx
             try
             {
                 var keyFile = @"C:\ProgramData\Qlik\Sense\Repository\Exported Certificates\.Local Certificates\server_key.pem";
-                if(!File.Exists(keyFile))
+                if (!File.Exists(keyFile))
                 {
                     ShowStatus($"The certificate file {keyFile} does not exist or has no authorization.");
                     return;
@@ -82,7 +82,7 @@ namespace q2gconpsexecuteqvx
 
                 var manager = new CryptoManager(keyFile);
                 var script = ScriptCode.Create(tbxSign.Text, manager);
-                if(script != null)
+                if (script != null)
                 {
                     Clipboard.SetText(script.ScriptWithSign);
                     tbxSign.Text = script.ScriptWithSign;
