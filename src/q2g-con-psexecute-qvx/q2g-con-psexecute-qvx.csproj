@@ -1,100 +1,113 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>net452</TargetFramework>
-		<OutputType>Exe</OutputType>
+  <PropertyGroup>
+    <TargetFramework>net452</TargetFramework>
+    <OutputType>WinExe</OutputType>
 
-		<Copyright>Copyright © 2019</Copyright>
-		<Authors>Konrad Mattheis, Martin Berthold</Authors>
-		<Company>q2g</Company>
-		<Description></Description>
+    <Copyright>Copyright © 2019</Copyright>
+    <Authors>Konrad Mattheis, Martin Berthold</Authors>
+    <Company>q2g</Company>
+    <Description></Description>
 
-		<Version>$(GitVersion_NuGetVersion)</Version>
-		<RootNamespace>q2gconpsexecuteqvx</RootNamespace>
-	</PropertyGroup>
+    <Version>$(GitVersion_NuGetVersion)</Version>
+    <RootNamespace>q2gconpsexecuteqvx</RootNamespace>
+  </PropertyGroup>
 
-	<Target Name="FixOnGitVersionTaskError" BeforeTargets="GetAssemblyVersion">
-		<CreateProperty Value="0.0.1-notgitversion" Condition="'$(GitVersion_NuGetVersion)' == ''">
-			<Output TaskParameter="Value" PropertyName="Version" />
-		</CreateProperty>
-	</Target>
+  <Target Name="FixOnGitVersionTaskError" BeforeTargets="GetAssemblyVersion">
+    <CreateProperty Value="0.0.1-notgitversion" Condition="'$(GitVersion_NuGetVersion)' == ''">
+      <Output TaskParameter="Value" PropertyName="Version" />
+    </CreateProperty>
+    <PropertyGroup Condition="'$(GitVersion_NuGetVersion)' == ''">
+      <DefineConstants>$(DefineConstants);MISSINGGIT;</DefineConstants>
+    </PropertyGroup>
+  </Target>
 
-	<ItemGroup>
-		<PackageReference Include="BouncyCastle" Version="1.8.4" />
-		<PackageReference Include="BuildWebCompiler" Version="1.12.394" PrivateAssets="all" />
-		<PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-		<PackageReference Include="NLog" Version="4.5.11" />
-		<PackageReference Include="System.Management.Automation.dll" version="10.0.10586.0" />
+  <Target Name="FixOnGitVersionInfoTaskError" BeforeTargets="GetAssemblyVersion">
+    <CreateProperty Value="$(GitVersion_InformationalVersion)">
+      <Output TaskParameter="Value" PropertyName="FullVersionInfo" />
+    </CreateProperty>
+    <PropertyGroup Condition="'$(GitVersion_InformationalVersion)' == ''">
+      <FullVersionInfo>0.0.1-notgitversion</FullVersionInfo>
+    </PropertyGroup>
+  </Target>
 
-		<Reference Include="QvxLibrary">
-			<HintPath>lib\QvxLibrary.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Windows" />
-		<Reference Include="System.Xaml" />
-		<Reference Include="System.Xml.Linq" />
-		<Reference Include="System.Xml" />
-		<Reference Include="System.Windows.Forms" />
-		<Reference Include="System.DirectoryServices" />
-		<Reference Include="System.DirectoryServices.AccountManagement" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle" Version="1.8.4" />
+    <PackageReference Include="BuildWebCompiler" Version="1.12.394" PrivateAssets="all" />
+    <PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="NLog" Version="4.5.11" />
+    <PackageReference Include="System.Management.Automation.dll" version="10.0.10586.0" />
 
-	<PropertyGroup>
-		<TypeScriptTarget>ES5</TypeScriptTarget>
-		<TypeScriptJSXEmit>None</TypeScriptJSXEmit>
-		<TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
-		<TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-		<TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-		<TypeScriptRemoveComments>False</TypeScriptRemoveComments>
-		<TypeScriptOutFile />
-		<TypeScriptOutDir />
-		<TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
-		<TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
-		<TypeScriptSourceMap>True</TypeScriptSourceMap>
-		<TypeScriptMapRoot />
-		<TypeScriptSourceRoot />
-		<AssemblyName>q2gconpsexecuteqvx</AssemblyName>
-	</PropertyGroup>
+    <Reference Include="QvxLibrary">
+      <HintPath>lib\QvxLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<TypeScriptCompile Include="web\*.ts" />
+  <PropertyGroup>
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
+    <AssemblyName>q2gconpsexecuteqvx</AssemblyName>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
 
-		<Content Include="web\connector-main.js" DependentUpon="connector-main.ts" CopyToOutputDirectory="Always" />
-		<Content Include="web\selectdialog.js" DependentUpon="selectdialog.ts" CopyToOutputDirectory="Always" />
-		<Content Include="web\connectdialog.js" DependentUpon="connectdialog.ts" CopyToOutputDirectory="Always" />
-		<Content Include="web\connectdialog.css" DependentUpon="connectdialog.less" CopyToOutputDirectory="Always" />
-		<Content Include="web\connectdialog.ng.html" CopyToOutputDirectory="Always" />
-		<Content Include="compilerconfig.json.defaults" DependentUpon="compilerconfig.json" />
+  <ItemGroup>
+    <TypeScriptCompile Include="web\*.ts" />
 
-		<None Include="tsconfig.json" />
-		<None Remove="web\*.js.map" />
-		<None Remove="web\.gitignore" />
-		<None Remove="lib\*" />
-	</ItemGroup>
+    <Content Include="web\connector-main.js" DependentUpon="connector-main.ts" CopyToOutputDirectory="Always" />
+    <Content Include="web\selectdialog.js" DependentUpon="selectdialog.ts" CopyToOutputDirectory="Always" />
+    <Content Include="web\connectdialog.js" DependentUpon="connectdialog.ts" CopyToOutputDirectory="Always" />
+    <Content Include="web\connectdialog.css" DependentUpon="connectdialog.less" CopyToOutputDirectory="Always" />
+    <Content Include="web\connectdialog.ng.html" CopyToOutputDirectory="Always" />
+    <Content Include="compilerconfig.json.defaults" DependentUpon="compilerconfig.json" />
 
-	<ItemGroup>
-		<Compile Update="frmMain.cs">
-			<SubType>Form</SubType>
-		</Compile>
-		<Compile Update="frmMain.Designer.cs" SubType="Form" DependentUpon="frmMain.cs" />
-	</ItemGroup>
+    <None Include="tsconfig.json" />
+    <None Remove="web\*.js.map" />
+    <None Remove="web\.gitignore" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Update="App.config">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Update="frmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="frmMain.Designer.cs" SubType="Form" DependentUpon="frmMain.cs" />
+  </ItemGroup>
 
-	<Target Name="verpatch" AfterTargets="Build">
-		<Message Importance="High" Text="InformationalVersion: $(GitVersion_InformationalVersion)" />
-		<Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G PowerShell&quot;" />
-		<Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(GitVersion_InformationalVersion)" />
-		<CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />
+  <ItemGroup>
+    <None Update="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="verpatch" AfterTargets="Build">
+    <Message Importance="High" Text="InformationalVersion: $(FullVersionInfo)" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G PowerShell&quot;" />
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(FullVersionInfo)" />
+    <CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />
     <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
   </Target>
 
   <Target Name="ZipPacked">
-    <Message Importance="High" Text="Version:$(GitVersion_InformationalVersion)" />
+    <Message Importance="High" Text="Version:$(FullVersionInfo)" />
     <Message Importance="High" Text="OutputPath: $(OutputPath)" />
     <ItemGroup>
       <ZipFiles Include="$(OutputPath)\*.*" />
@@ -104,15 +117,15 @@
   </Target>
 
   <Target Name="DebugCopy">
-		<PropertyGroup>
-			<QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikServerPath>
-			<QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikDesktopPath>
-		</PropertyGroup>
-		<ItemGroup>
-			<OutputFiles Include="$(OutputPath)\**\*.*" />
-		</ItemGroup>
-		<Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
-		<Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
-	</Target>
+    <PropertyGroup>
+      <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikServerPath>
+      <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikDesktopPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <OutputFiles Include="$(OutputPath)\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+  </Target>
 
 </Project>
