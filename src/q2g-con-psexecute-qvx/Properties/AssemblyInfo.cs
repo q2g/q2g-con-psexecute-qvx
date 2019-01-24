@@ -9,3 +9,10 @@ using System.Runtime.InteropServices;
 
 // Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt für COM verfügbar gemacht wird
 [assembly: Guid("21281672-e242-41b3-bc23-f15ff5bbca24")]
+
+#if MISSINGGIT
+public static class GitVersionInformation
+{
+    public static readonly string InformationalVersion = "noGITVersion";
+}
+#endif
