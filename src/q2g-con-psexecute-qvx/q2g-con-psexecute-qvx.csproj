@@ -36,7 +36,7 @@
     <PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="NLog" Version="4.5.11" />
+    <PackageReference Include="NLog" Version="4.6.1" />
     <PackageReference Include="System.Management.Automation.dll" version="10.0.10586.0" />
 
     <Reference Include="QvxLibrary">
