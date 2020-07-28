@@ -1,42 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <OutputType>WinExe</OutputType>
-
     <Copyright>Copyright © 2019</Copyright>
     <Authors>Konrad Mattheis, Martin Berthold</Authors>
     <Company>q2g</Company>
     <Description></Description>
-
-    <Version>$(GitVersion_NuGetVersion)</Version>
+    <Version>2.0.0</Version>
     <RootNamespace>q2gconpsexecuteqvx</RootNamespace>
   </PropertyGroup>
 
-  <Target Name="FixOnGitVersionTaskError" BeforeTargets="GetAssemblyVersion">
-    <CreateProperty Value="0.0.1-notgitversion" Condition="'$(GitVersion_NuGetVersion)' == ''">
-      <Output TaskParameter="Value" PropertyName="Version" />
-    </CreateProperty>
-    <PropertyGroup Condition="'$(GitVersion_NuGetVersion)' == ''">
-      <DefineConstants>$(DefineConstants);MISSINGGIT;</DefineConstants>
-    </PropertyGroup>
-  </Target>
-
-  <Target Name="FixOnGitVersionInfoTaskError" BeforeTargets="GetAssemblyVersion">
-    <CreateProperty Value="$(GitVersion_InformationalVersion)">
-      <Output TaskParameter="Value" PropertyName="FullVersionInfo" />
-    </CreateProperty>
-    <PropertyGroup Condition="'$(GitVersion_InformationalVersion)' == ''">
-      <FullVersionInfo>0.0.1-notgitversion</FullVersionInfo>
-    </PropertyGroup>
-  </Target>
-
   <ItemGroup>
-    <PackageReference Include="BouncyCastle" Version="1.8.4" />
-    <PackageReference Include="BuildWebCompiler" Version="1.12.394" PrivateAssets="all" />
-    <PackageReference Include="GitVersionTask" Version="4.0.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.TypeScript.MSBuild" version="3.2.3" PrivateAssets="all" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="NLog" Version="4.5.11" />
+    <PackageReference Include="BouncyCastle" Version="1.8.6.1" />
+    <PackageReference Include="BuildWebCompiler" Version="1.12.405" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="NLog" Version="4.7.2" />
     <PackageReference Include="System.Management.Automation.dll" version="10.0.10586.0" />
 
     <Reference Include="QvxLibrary">
@@ -86,9 +64,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="frmMain.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Update="frmMain.cs" />
     <Compile Update="frmMain.Designer.cs" SubType="Form" DependentUpon="frmMain.cs" />
   </ItemGroup>
 
@@ -99,14 +75,14 @@
   </ItemGroup>
 
   <Target Name="verpatch" AfterTargets="Build">
-    <Message Importance="High" Text="InformationalVersion: $(FullVersionInfo)" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2G PowerShell&quot;" />
-    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv $(FullVersionInfo)" />
-    <CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />
-    <CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />
+    <!--<Message Importance="High" Text="InformationalVersion: 2.0.0" />-->
+    <Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /s &quot;QlikView Connector&quot; &quot;Q2GPowerShell&quot;" />
+    <!--<Exec Command="&quot;$(ProjectDir)lib\verpatch.exe&quot; &quot;$(TargetPath)&quot; /high /pv 2.0.0" />-->
+    <!--<CallTarget Targets="DebugCopy" Condition="'$(Configuration)'=='Debug'" />-->
+    <!--<CallTarget Targets="ZipPacked" Condition="'$(Configuration)'=='Release'" />-->
   </Target>
 
-  <Target Name="ZipPacked">
+  <!--<Target Name="ZipPacked">
     <Message Importance="High" Text="Version:$(FullVersionInfo)" />
     <Message Importance="High" Text="OutputPath: $(OutputPath)" />
     <ItemGroup>
@@ -114,9 +90,9 @@
       <ZipFiles Include="$(OutputPath)\web\" />
     </ItemGroup>
     <Exec Command="PowerShell -command Compress-Archive -force @(ZipFiles, ',') $(MSBuildProjectDirectory)\bin\$(AssemblyName).zip" />
-  </Target>
+  </Target>-->
 
-  <Target Name="DebugCopy">
+  <!--<Target Name="DebugCopy">
     <PropertyGroup>
       <QlikServerPath>C:\Program Files\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikServerPath>
       <QlikDesktopPath>$(LocalAppData)\..\Local\Programs\Common Files\Qlik\Custom Data\q2gconpsexecuteqvx</QlikDesktopPath>
@@ -124,8 +100,7 @@
     <ItemGroup>
       <OutputFiles Include="$(OutputPath)\**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikDesktopPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
     <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(QlikServerPath)\%(RecursiveDir)" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
-  </Target>
+  </Target>-->
 
 </Project>

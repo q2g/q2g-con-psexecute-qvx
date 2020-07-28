@@ -11,6 +11,7 @@ namespace q2gconpsexecuteqvx
 {
     #region Usings
     using System;
+    using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
     using System.Threading;
     using NLog;
@@ -20,7 +21,7 @@ namespace q2gconpsexecuteqvx
     public class PSExecuteServer : QvxServer
     {
         #region Logger
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly static Logger logger = LogManager.GetCurrentClassLogger();
         #endregion
 
         #region Methods
@@ -59,7 +60,7 @@ namespace q2gconpsexecuteqvx
                 switch (method)
                 {
                     case "getVersion":
-                        response = new Info { qMessage = GitVersionInformation.InformationalVersion };
+                        response = new Info { qMessage = "2.0.0" };
                         break;
                     case "getUsername":
                         response = new Info { qMessage = connection.MParameters["UserId"] };
